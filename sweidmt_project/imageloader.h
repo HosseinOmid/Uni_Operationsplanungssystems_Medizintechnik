@@ -19,6 +19,9 @@ private:
     Ui::MainWindow *ui;
     short* m_pImageData;
     short* m_pImageData3D;
+    short* tiefenkarte;
+    bool data2Dloaded;
+
     int windowing(int HU_value, int startValue, int windowWidth);
 
 private slots:
@@ -28,7 +31,13 @@ private slots:
     void updateWindowingStart(int value);
     void updateWindowingWidth(int value);
     void updateLayerNr(int value);
+    void updateTreshold(int value);
+
+
     void update2DView();
     void update3DView();
+    void updateView();
+    void updateTiefenkarteView();
+    void update3Dreflection();
 };
 #endif // ImageLoader // old name: MAINWINDOW_H
