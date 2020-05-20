@@ -1,17 +1,23 @@
 #include "imageloader.h"
-#include "ui_imageloader.h"
+#include "ui_ImageLoader.h"
+#include "applicationdata.h"
+#include "mylib.h"
+
 #include <QFile>
 #include <QFileDialog>
 #include <qmessagebox.h>
 #include <cmath>
 
-ImageLoader::ImageLoader(QWidget *parent)
+ImageLoader::ImageLoader(QWidget *parent, ApplicationData* pData)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+     //m_ApplicationData = new ApplicationData(this);
+     //m_ApplicationData->setData(&m_data);
+
+
+    // Events von GUI mit Funktionen verknüpfen
     ui->setupUi(this);
-    connect(ui->pushButton_Pixel, SIGNAL(clicked()), this, SLOT(MalePixel()));
-    connect(ui->pushButton_12bit, SIGNAL(clicked()), this, SLOT(MalePixel_12bit()));
     connect(ui->pushButton_load3D, SIGNAL(clicked()), this, SLOT(MalePixel_3D()));
     connect(ui->pushButton_Tiefenkarte, SIGNAL(clicked()), this, SLOT(updateTiefenkarteView()));
     connect(ui->pushButton_3D, SIGNAL(clicked()), this, SLOT(update3Dreflection()));
@@ -24,16 +30,12 @@ ImageLoader::ImageLoader(QWidget *parent)
 
 
 
-    // Speicher der Größe 512*512 reservieren
-    m_pImageData = new short[512*512];
+    // Speicher der Größe 512*512*130 reservieren
     m_pImageData3D = new short[512*512*130];
     tiefenkarte = new short[512*512];
     //default values for the sliders
     //ui->slider_WindowWidth->setValue(1000);
     //ui->slider_WindowWidth->setValue(1000);
-
-    data2Dloaded = false ;
-
 }
 
 ImageLoader::~ImageLoader()
@@ -43,20 +45,28 @@ ImageLoader::~ImageLoader()
     delete[] m_pImageData;
     delete[] m_pImageData3D;
     delete[] tiefenkarte;
+    delete m_pData; //brauchen wir das?
 
 }
-int ImageLoader::windowing(int HU_value, int startValue, int windowWidth)
+
+void ImageLoader::setData(ApplicationData* pData)
 {
-    int iGrauwert = 0;
-    //Fensterung berechnen
-    if (HU_value< startValue)
-        iGrauwert = 0;
-    if (HU_value> startValue+windowWidth)
-        iGrauwert = 255;
-    if (HU_value>= startValue  && HU_value<= startValue+windowWidth)
-        iGrauwert = 255.0 / windowWidth * (HU_value - startValue);
-    return iGrauwert;
+    this->m_pData = pData;
 }
+
+
+//int ImageLoader::windowing(int HU_value, int startValue, int windowWidth)
+//{
+//    int iGrauwert = 0;
+//    //Fensterung berechnen
+//    if (HU_value< startValue)
+  //      iGrauwert = 0;
+//    if (HU_value> startValue+windowWidth)
+//        iGrauwert = 255;
+//    if (HU_value>= startValue  && HU_value<= startValue+windowWidth)
+//        iGrauwert = 255.0 / windowWidth * (HU_value - startValue);
+//    return iGrauwert;
+//}
 
 void ImageLoader::updateWindowingStart(int value)
 {
@@ -140,14 +150,7 @@ void ImageLoader::updateTiefenkarteView()
 }
 void ImageLoader::updateView()
 {
-    if (data2Dloaded)
-    {
-        update2DView();
-    }
-    else
-    {
-        update3DView();
-    }
+    update3DView();
 }
 void ImageLoader::update3DView()
 {
@@ -165,134 +168,37 @@ void ImageLoader::update3DView()
         {
             int index = j * 512 + i + 512*512*layerNr ;
             int HU_value = m_pImageData3D[index];
-            int iGrauwert = windowing(HU_value, startValue, windowWidth);
+            int iGrauwert = MyLib::windowing(HU_value, startValue, windowWidth);
             image.setPixel(i,j,qRgb(iGrauwert, iGrauwert, iGrauwert));
         }
     }
 
     // Bild auf Benutzeroberfläche anzeigen
     ui->label_image->setPixmap(QPixmap::fromImage(image));
-
-}
-void ImageLoader::update2DView()
-{
-    // Erzeugen ein Objekt vom Typ QImage
-    QImage image(512,512, QImage::Format_RGB32);
-
-    int startValue = ui->slider_StartValue->value();
-    int windowWidth = ui->slider_WindowWidth->value();
-
-    int treshold_red = ui->Slider_Treshold->value();
-
-    for (int i = 0; i < 512; i++)
-    {
-        for (int j = 0; j < 512; j++)
-        {
-            int index = j * 512 + i ;
-            int HU_value = m_pImageData[index];
-            int iGrauwert = windowing(HU_value, startValue, windowWidth);
-            if (HU_value < treshold_red)
-            {
-                image.setPixel(i,j,qRgb(iGrauwert, iGrauwert, iGrauwert));
-
-            }
-            else
-            {
-                image.setPixel(i,j,qRgb(255, 0, 0));
-            }
-        }
-    }
-
-    // Bild auf Benutzeroberfläche anzeigen
-    ui->label_image->setPixmap(QPixmap::fromImage(image));
-
 }
 
 void ImageLoader::MalePixel_3D()
 {
     // Pfad zu der Datei festlegen
-    QFile dataFile("D:/OneDrive/Uni_Unterlagen/2020SS_SoftwareEntwicklung/Zusatzmaterial/Kopf_CT_130.raw");
+    QString path = "D:/OneDrive/Uni_Unterlagen/2020SS_SoftwareEntwicklung/Zusatzmaterial/Kopf_CT_130.raw";
 
-    bool bFileOpen = dataFile.open(QIODevice::ReadOnly);
-    if (!bFileOpen)
-    {
+    QFile dataFile(path);
+    //bool bFileOpen = dataFile.open(QIODevice::ReadOnly);
+    //if (!bFileOpen)
+    //{
         //QMessageBox::critical(this, "ACHTUNG", "Datei konnte nicht geöffnet werden");
-        return;
-    }
+    //    return;
+    //}
 
     // Datei lesen
-    int iNumberBytesRead = dataFile.read((char*)m_pImageData3D, 512*512*130*sizeof(short));
+    //int iNumberBytesRead = dataFile.read((char*)m_pImageData3D, 512*512*130*sizeof(short));
     // zum vergleich der Dateilänge mit der eingelesenen Länge
-    int iFileSize = dataFile.size();
+    //int iFileSize = dataFile.size();
 
-    dataFile.close();
+    //dataFile.close();
 
-    data2Dloaded = false;
+    bool stat = m_pData->uploadImage(path);
+    const short* pImage = m_pData->getImage();
 
     update3DView();
-}
-void ImageLoader::MalePixel_12bit()
-{
-    // Pfad zu der Datei festlegen
-    QFile dataFile("D:/OneDrive/Uni_Unterlagen/2020SS_SoftwareEntwicklung/Zusatzmaterial/12bit_short.raw");
-
-    bool bFileOpen = dataFile.open(QIODevice::ReadOnly);
-    if (!bFileOpen)
-    {
-        //QMessageBox::critical(this, "ACHTUNG", "Datei konnte nicht geöffnet werden");
-        return;
-    }
-
-    // Datei lesen
-    int iNumberBytesRead = dataFile.read((char*)m_pImageData, 512*512*sizeof(short));
-    // zum vergleich der Dateilänge mit der eingelesenen Länge
-    int iFileSize = dataFile.size();
-
-    dataFile.close();
-
-    data2Dloaded = true;
-
-    update2DView();
-}
-
-void ImageLoader::MalePixel()
-{
-    //ui->pushButton_Pixel->setText("Funktioniert");
-
-    // Erzeugen ein Objekt vom Typ QImage
-    QImage image(512,512, QImage::Format_RGB32);
-
-    // reserviere zusammenhängenden Speicherbereich der Größe 512*512
-    char imageData[512*512];
-
-    // Pfad zu der Datei festlegen
-    QFile dataFile("D:/OneDrive/Uni_Unterlagen/2020SS_SoftwareEntwicklung/Programme/Aufgabe1/Aufgabe1/8bit.raw");
-
-    bool bFileOpen = dataFile.open(QIODevice::ReadOnly);
-    if (!bFileOpen)
-    {
-        //QMessageBox::critical(this, "ACHTUNG", "Datei konnte nicht geöffnet werden");
-        return;
-    }
-
-
-    // Datei lesen
-    int iNumberBytesRead = dataFile.read(imageData, 512*512);
-    // zum vergleich der Dateilänge mit der eingelesenen Länge
-    int iFileSize = dataFile.size();
-
-    dataFile.close();
-
-    for (int i = 0; i < 512; i++)
-    {
-        for (int j = 0; j < 512; j++)
-        {
-            int index = j * 512 + i ;
-            int iGrauwert = imageData[index];
-            image.setPixel(i,j,qRgb(iGrauwert, iGrauwert, iGrauwert));
-        }
-    }
-
-    // Bild auf Benutzeroberfläche anzeigen
-    ui->label_image->setPixmap(QPixmap::fromImage(image));
 }

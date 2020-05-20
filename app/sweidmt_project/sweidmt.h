@@ -4,6 +4,8 @@
 #include <QWidget>
 // aus Aufgabe 2
 #include "imageloader.h"
+// aus Aufgabe 5
+#include "applicationdata.h"
 
 namespace Ui {
 class SWEIDMT;
@@ -20,6 +22,7 @@ public:
 private:
     Ui::SWEIDMT *ui;
     ImageLoader *m_pWidget;
+    ApplicationData m_data;
 };
 
 #endif // SWEIDMT_H
