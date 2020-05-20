@@ -2,9 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "applicationdata.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
 class ImageLoader : public QMainWindow
@@ -12,21 +15,21 @@ class ImageLoader : public QMainWindow
     Q_OBJECT
 
 public:
-    ImageLoader(QWidget *parent = nullptr);
+    ImageLoader(QWidget *parent = nullptr,ApplicationData* pData = nullptr);
     ~ImageLoader();
+    void setData(ApplicationData* pData);
 
 private:
     Ui::MainWindow *ui;
+    ApplicationData *m_pData;
+
     short* m_pImageData;
     short* m_pImageData3D;
     short* tiefenkarte;
-    bool data2Dloaded;
 
-    int windowing(int HU_value, int startValue, int windowWidth);
+    //int windowing(int HU_value, int startValue, int windowWidth);
 
 private slots:
-    void MalePixel();
-    void MalePixel_12bit();
     void MalePixel_3D();
     void updateWindowingStart(int value);
     void updateWindowingWidth(int value);
@@ -34,7 +37,6 @@ private slots:
     void updateTreshold(int value);
 
 
-    void update2DView();
     void update3DView();
     void updateView();
     void updateTiefenkarteView();
