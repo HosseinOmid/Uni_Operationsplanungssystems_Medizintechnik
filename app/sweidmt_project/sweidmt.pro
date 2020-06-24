@@ -19,16 +19,19 @@ SOURCES += \
     applicationdata.cpp \
     imageloader.cpp \
     main.cpp \
-    sweidmt.cpp
+    sweidmt.cpp \
+    view3d.cpp
 
 HEADERS += \
     applicationdata.h \
     imageloader.h \
-    sweidmt.h
+    sweidmt.h \
+    view3d.h
 
 FORMS += \
     ImageLoader.ui \
-    sweidmt.ui
+    sweidmt.ui \
+    view3d.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -39,5 +42,7 @@ win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../MyLib/release/ -
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../MyLib/debug/ -lMyLib
 else:unix: LIBS += -L$$OUT_PWD/../../MyLib/ -lMyLib
 
-INCLUDEPATH += $$PWD/../../MyLib
+INCLUDEPATH += $$PWD/../../MyLib \
+$$PWD/../eigen-3.3.7
+
 DEPENDPATH += $$PWD/../../MyLib

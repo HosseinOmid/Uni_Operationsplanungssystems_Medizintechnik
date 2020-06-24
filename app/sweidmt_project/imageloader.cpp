@@ -155,6 +155,7 @@ void ImageLoader::updateTiefenkarteView()
 void ImageLoader::updateView()
 {
     update3DView();
+    emit LOG("Das ist ein Beispieltext");
 }
 void ImageLoader::update3DView()
 {

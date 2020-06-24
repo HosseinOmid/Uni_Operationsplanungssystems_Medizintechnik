@@ -46,5 +46,8 @@ private slots:
     void updateView();
     void updateTiefenkarteView();
     void update3Dreflection();
+
+signals:
+    void LOG(QString str);
 };
 #endif // ImageLoader // old name: MAINWINDOW_H
