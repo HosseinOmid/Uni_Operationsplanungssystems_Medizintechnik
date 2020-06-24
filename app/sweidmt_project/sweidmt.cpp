@@ -8,6 +8,7 @@ SWEIDMT::SWEIDMT(QWidget *parent) :
     ui->setupUi(this);
     m_pWidget = new ImageLoader(this);
     ui->tabWidget->addTab(m_pWidget, "Load Image");
+    m_pWidget->setData(&m_data);
 }
 
 

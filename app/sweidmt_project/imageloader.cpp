@@ -8,7 +8,7 @@
 #include <qmessagebox.h>
 #include <cmath>
 
-ImageLoader::ImageLoader(QWidget *parent, ApplicationData* pData)
+ImageLoader::ImageLoader(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
@@ -31,8 +31,8 @@ ImageLoader::ImageLoader(QWidget *parent, ApplicationData* pData)
 
 
     // Speicher der Größe 512*512*130 reservieren
-    m_pImageData3D = new short[512*512*130];
-    tiefenkarte = new short[512*512];
+    //m_pImageData3D = new short[512*512*130];
+    //tiefenkarte = new short[512*512];
     //default values for the sliders
     //ui->slider_WindowWidth->setValue(1000);
     //ui->slider_WindowWidth->setValue(1000);
@@ -42,14 +42,14 @@ ImageLoader::~ImageLoader()
 {
     delete ui;
     // Speicher wieder freigeben
-    delete[] m_pImageData;
-    delete[] m_pImageData3D;
-    delete[] tiefenkarte;
-    delete m_pData; //brauchen wir das?
+    //delete[] m_pImageData;
+    //delete[] m_pImageData3D;
+    //delete[] tiefenkarte;
+    //delete m_pData; //brauchen wir das?
 
 }
 
-void ImageLoader::setData(ApplicationData* pData)
+void ImageLoader::setData(ApplicationData *pData)
 {
     this->m_pData = pData;
 }
@@ -93,6 +93,7 @@ void ImageLoader::updateTreshold(int value)
 
 void ImageLoader::update3Dreflection()
 {
+    const short* tmpTiefenkarte = m_pData->getDepthMap();
     // Erzeugen ein Objekt vom Typ QImage
     QImage image(512,512, QImage::Format_RGB32);
     for (int i = 1; i < 511; i++)
@@ -102,10 +103,10 @@ void ImageLoader::update3Dreflection()
             //int iTiefe = tiefenkarte[j * 512 + i];
             int sx = 2;
             int sy = 2;
-            int leftXNeighbor  = tiefenkarte[j * 512 + i-1];
-            int rightXNeighbor = tiefenkarte[j * 512 + i+1];
-            int leftYNeighbor  = tiefenkarte[(j-1) * 512 + i];
-            int rightYNeighbor = tiefenkarte[(j+1) * 512 + i];
+            int leftXNeighbor  = tmpTiefenkarte[j * 512 + i-1];
+            int rightXNeighbor = tmpTiefenkarte[j * 512 + i+1];
+            int leftYNeighbor  = tmpTiefenkarte[(j-1) * 512 + i];
+            int rightYNeighbor = tmpTiefenkarte[(j+1) * 512 + i];
             int Tx = leftXNeighbor - rightXNeighbor;
             int Ty = leftYNeighbor - rightYNeighbor ;
 
@@ -120,6 +121,9 @@ void ImageLoader::update3Dreflection()
 }
 void ImageLoader::updateTiefenkarteView()
 {
+    const short* tmpMPImage = m_pData->getImage();
+    //const short* tmpMPImage = m_pData->getImage();
+
     // Erzeugen ein Objekt vom Typ QImage
     QImage image(512,512, QImage::Format_RGB32);
 
@@ -133,14 +137,14 @@ void ImageLoader::updateTiefenkarteView()
             for (int iLayer = 129; iLayer>= 0; iLayer--)
             {
                 int index = j * 512 + i + 512*512*iLayer ;
-                int HU_value = m_pImageData3D[index];
+                int HU_value = tmpMPImage[index];
                 if(HU_value >treshold_red)
                 {
                     iTiefe = 129 - iLayer;
                     break;
                 }
             }
-            tiefenkarte[j * 512 + i] = iTiefe;
+            //tiefenkarte[j * 512 + i] = iTiefe;
             image.setPixel(i,j,qRgb(iTiefe, iTiefe, iTiefe));
         }
     }
@@ -154,6 +158,7 @@ void ImageLoader::updateView()
 }
 void ImageLoader::update3DView()
 {
+    const short* tmp_mPImage = m_pData->getImage();
     // Erzeugen ein Objekt vom Typ QImage
     QImage image(512,512, QImage::Format_RGB32);
 
@@ -167,7 +172,7 @@ void ImageLoader::update3DView()
         for (int j = 0; j < 512; j++)
         {
             int index = j * 512 + i + 512*512*layerNr ;
-            int HU_value = m_pImageData3D[index];
+            int HU_value = tmp_mPImage[index];
             int iGrauwert = MyLib::windowing(HU_value, startValue, windowWidth);
             image.setPixel(i,j,qRgb(iGrauwert, iGrauwert, iGrauwert));
         }
@@ -182,7 +187,7 @@ void ImageLoader::MalePixel_3D()
     // Pfad zu der Datei festlegen
     QString path = "D:/OneDrive/Uni_Unterlagen/2020SS_SoftwareEntwicklung/Zusatzmaterial/Kopf_CT_130.raw";
 
-    QFile dataFile(path);
+    //QFile dataFile(path);
     //bool bFileOpen = dataFile.open(QIODevice::ReadOnly);
     //if (!bFileOpen)
     //{

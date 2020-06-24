@@ -6,6 +6,11 @@ ApplicationData::ApplicationData()
     m_pImageData = new short[512*512*130];
     m_pTiefenkarte = new short[512*512];
 }
+ApplicationData::~ApplicationData()
+{
+    delete[] m_pImageData;
+    delete[] m_pTiefenkarte;
+}
 
 const short* ApplicationData::getImage(){
     return m_pImageData;
@@ -29,10 +34,10 @@ bool ApplicationData::uploadImage(QString path)
     }
 
     // Datei lesen
-    short* x;
-    x = new short[512*512*130];
-    dataFile.read((char*)x, 512*512*130*sizeof(short));
-    m_pImageData = x;
+    //short* x;
+    //x = new short[512*512*130];
+    dataFile.read((char*)m_pImageData, 512*512*130*sizeof(short));
+    //m_pImageData = x;
 
     dataFile.close();
     return true;
