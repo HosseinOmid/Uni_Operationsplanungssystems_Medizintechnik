@@ -46,6 +46,7 @@ private:
     //short* m_pImageData;
     //short* m_pImageData3D;
     //short* tiefenkarte;
+    //short* m_pTiefenkarteFront;
 
     //int windowing(int HU_value, int startValue, int windowWidth);
 
@@ -61,10 +62,10 @@ private slots:
     void updateLayerNrFront(int value);
     void updateTresholdFront(int value);
 
-    void update3DView();
     void updateView();
     //void updateTiefenkarteView();
     void update3Dreflection();
+    void update3DreflectionFront();
 
     void mousePressEvent(QMouseEvent *event);
 

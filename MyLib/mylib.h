@@ -2,6 +2,8 @@
 #define MYLIB_H
 
 #include "MyLib_global.h"
+#include <QFile>
+#include <cmath>
 //#include "Eigen/Core"
 
 /**
@@ -71,6 +73,9 @@ public:
      */
     static int getSlice(const image3D& image, const Reconstruction& param, image2D& im2D);
 
+
+
+    static bool calc3Dreflection(const image2D* im2D, image2D& im2DOut);
 
 };
 
