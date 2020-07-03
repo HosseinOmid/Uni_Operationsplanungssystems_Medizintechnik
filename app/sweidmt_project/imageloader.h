@@ -9,6 +9,12 @@
 #include "mylib.h"
 #include <QDebug>
 
+struct point
+{
+    double x;
+    double y;
+    double z;
+};
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -28,6 +34,15 @@ private:
     Ui::MainWindow *ui;
     ApplicationData *m_pData;
 
+    point firstPoint;
+    point secPoint;
+    int countPoint;
+    bool drawLine;
+    point firstPointFront;
+    point secPointFront;
+    int countPointFront;
+    bool drawLineFront;
+
     //short* m_pImageData;
     //short* m_pImageData3D;
     //short* tiefenkarte;
@@ -41,11 +56,17 @@ private slots:
     void updateLayerNr(int value);
     void updateTreshold(int value);
 
+    void updateWindowingStartFront(int value);
+    void updateWindowingWidthFront(int value);
+    void updateLayerNrFront(int value);
+    void updateTresholdFront(int value);
 
     void update3DView();
     void updateView();
-    void updateTiefenkarteView();
+    //void updateTiefenkarteView();
     void update3Dreflection();
+
+    void mousePressEvent(QMouseEvent *event);
 
 signals:
     void LOG(QString str);
