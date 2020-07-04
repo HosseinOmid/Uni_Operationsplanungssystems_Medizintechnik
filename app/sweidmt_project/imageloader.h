@@ -9,8 +9,7 @@
 #include "mylib.h"
 #include <QDebug>
 
-struct point
-{
+struct point{
     double x;
     double y;
     double z;
@@ -21,8 +20,7 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-class ImageLoader : public QMainWindow
-{
+class ImageLoader : public QMainWindow{
     Q_OBJECT
 
 public:
@@ -48,15 +46,14 @@ private:
     //short* tiefenkarte;
     //short* m_pTiefenkarteFront;
 
-    //int windowing(int HU_value, int startValue, int windowWidth);
-
 private slots:
-    void MalePixel_3D();
+    void loadData();
     void updateWindowingStart(int value);
     void updateWindowingWidth(int value);
     void updateLayerNr(int value);
     void updateTreshold(int value);
 
+    void updateAllSlidernLabels();
     void updateWindowingStartFront(int value);
     void updateWindowingWidthFront(int value);
     void updateLayerNrFront(int value);
@@ -67,7 +64,7 @@ private slots:
     void update3Dreflection();
     void update3DreflectionFront();
 
-    void mousePressEvent(QMouseEvent *event);
+    //void mousePressEvent(QMouseEvent *event);
 
 signals:
     void LOG(QString str);
