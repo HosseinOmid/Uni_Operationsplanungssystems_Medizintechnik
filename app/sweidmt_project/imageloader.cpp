@@ -37,9 +37,9 @@ ImageLoader::ImageLoader(QWidget *parent)
     //connect(ui->radioButton_DepthMap, SIGNAL(toggled()), this, SLOT(updateView()));
     //connect(ui->radioButton_3D, SIGNAL(toggled()), this, SLOT(updateView()));
     //connect(ui->radioButton_ViewLayers, SIGNAL(toggled()), this, SLOT(updateView()));
-    connect(ui->radioButton_DepthMapFront, SIGNAL(toggled()), this, SLOT(updateView()));
-    connect(ui->radioButton_3DFront, SIGNAL(toggled()), this, SLOT(updateView()));
-    connect(ui->radioButton_ViewLayersFront, SIGNAL(toggled()), this, SLOT(updateView()));
+    //connect(ui->radioButton_DepthMapFront, SIGNAL(toggled()), this, SLOT(updateView()));
+    //connect(ui->radioButton_3DFront, SIGNAL(toggled()), this, SLOT(updateView()));
+    //connect(ui->radioButton_ViewLayersFront, SIGNAL(toggled()), this, SLOT(updateView()));
 
     ImageLoader::updateAllSlidernLabels();
 }
@@ -53,6 +53,39 @@ ImageLoader::~ImageLoader(){
 // creat a connection to application data --------------
 void ImageLoader::setData(ApplicationData *pData){
     this->m_pData = pData;
+}
+
+void ImageLoader::reconstructSlice(){
+    Reconstruction reco;
+    vector planeNormalVector;
+
+    double a = secPoint.x - firstPoint.x;
+    double b = secPoint.y - firstPoint.y;
+    double c = secPoint.z - firstPoint.z;
+    planeNormalVector.x = a;
+    planeNormalVector.x = b;
+    planeNormalVector.x = c;
+
+    int sliceDistToFirstPointPerc = ui->horizontalSlider->value();
+
+    reco.pos.x = firstPoint.x + a * sliceDistToFirstPointPerc/100;
+    reco.pos.y = firstPoint.y + b * sliceDistToFirstPointPerc/100;
+    reco.pos.z = firstPoint.z + c * sliceDistToFirstPointPerc/100;
+
+    // equation on plane: ax + by + cz = d
+    // also we know that the point reco.pos is place on the plan
+    double d = a*reco.pos.x + b*reco.pos.y + c*reco.pos.z;
+    // consider xdir=(1, y1, 0) ; ydir=(1, y2, z2)
+    // xdir and ydir are orthogonal, e.a (xdir.ydir = 0)
+    // and both xdir and ydir are placed on the plan and should satisfy the plane equation
+    // so the result is the following:
+    reco.xdir.x = 1;
+    reco.xdir.y = (d-a)/b;
+    reco.xdir.z = 0;
+
+    reco.ydir.x = 1;
+    reco.ydir.y = -b/(d-a);
+    reco.ydir.z = (d-a + pow(b,2)/(d-a))/c;
 }
 
 /*void ImageLoader::mousePressEvent(QMouseEvent *event){
@@ -131,7 +164,7 @@ void ImageLoader::updateView()
     int tresholdFront = ui->Slider_Threshold_Front->value();
 
 
-    if (false){
+    if (true){
         // ------- Top-View -------------------------------------------------------------
         for (int i = 0; i < tmp_im3D.width; i++){
             for (int j = 0; j < tmp_im3D.height; j++){
@@ -143,7 +176,7 @@ void ImageLoader::updateView()
             }
         }
     }
-    if(ui->radioButton_ViewLayersFront->isChecked()){
+    if(true){
         //-------------- front view -----------------------------------------------------
         for (int i = 0; i < 512; i++){
             for (int z = 0; z < 512; z++){
@@ -168,7 +201,7 @@ void ImageLoader::updateView()
             }
         }
     }
-    if (ui->radioButton_3DFront->isChecked()) {
+    if (false) {
         //-------------- front view -----------------------------------------------------
         bool stat = m_pData->calculateDepthMapFront(tresholdFront);
         const image2D* tmpDepthMap = m_pData->getDepthMapFront();
@@ -192,7 +225,7 @@ void ImageLoader::updateView()
             }
         }
     }
-    if (ui->radioButton_DepthMapFront->isChecked()) {
+    if (false) {
 
     }
 
@@ -332,8 +365,8 @@ void ImageLoader::updateView()
             int z = (int) dz;
             int iGrayVal;
             int iIndex = x+y*512+z*512*512;
-            if (iIndex>=0 && iIndex< 512*512*512){
-                int iHuVal = tmp_im3D.pImage[x+y*512+z*512*512];
+            if (x>=0 && x<tmp_im3D.width && y>=0 && y<tmp_im3D.height && z>=0 && z<tmp_im3D.slices){
+                int iHuVal = tmp_im3D.pImage[iIndex];
                 int error_stat = MyLib::windowing(iHuVal, startValue, windowWidth, iGrayVal);
             }
             else{

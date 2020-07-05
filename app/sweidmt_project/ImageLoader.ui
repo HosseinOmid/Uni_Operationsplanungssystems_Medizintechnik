@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1763</width>
+    <width>1836</width>
     <height>860</height>
    </rect>
   </property>
@@ -20,304 +20,23 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>1260</x>
-      <y>60</y>
-      <width>512</width>
-      <height>512</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>reconstructed Lyer</string>
-    </property>
-   </widget>
-   <widget class="QSlider" name="horizontalSlider">
-    <property name="geometry">
-     <rect>
-      <x>1260</x>
-      <y>690</y>
-      <width>331</width>
-      <height>18</height>
-     </rect>
-    </property>
-    <property name="maximum">
-     <number>512</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>1610</x>
-      <y>670</y>
-      <width>121</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>Move layer along the trajectory</string>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton_load3D">
     <property name="geometry">
      <rect>
-      <x>570</x>
-      <y>40</y>
+      <x>10</x>
+      <y>80</y>
       <width>90</width>
       <height>29</height>
      </rect>
     </property>
     <property name="text">
-     <string>Load 3D</string>
+     <string>Load Data</string>
     </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_2">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>10</y>
-      <width>561</width>
-      <height>781</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Up View</string>
-    </property>
-    <widget class="QPushButton" name="pushButton_3D_Front">
-     <property name="geometry">
-      <rect>
-       <x>460</x>
-       <y>570</y>
-       <width>90</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>3D</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_Start_Front">
-     <property name="geometry">
-      <rect>
-       <x>421</x>
-       <y>650</y>
-       <width>111</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Start:</string>
-     </property>
-    </widget>
-    <widget class="QSlider" name="slider_StartValue_Front">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>650</y>
-       <width>401</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="minimum">
-      <number>-1024</number>
-     </property>
-     <property name="maximum">
-      <number>4095</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-    <widget class="QSlider" name="slider_LayerNr_Front">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>710</y>
-       <width>401</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="minimum">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <number>511</number>
-     </property>
-     <property name="value">
-      <number>305</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-    <widget class="QSlider" name="Slider_Threshold_Front">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>740</y>
-       <width>401</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="minimum">
-      <number>-1024</number>
-     </property>
-     <property name="maximum">
-      <number>3071</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_Width_Front">
-     <property name="geometry">
-      <rect>
-       <x>421</x>
-       <y>680</y>
-       <width>111</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Width:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_Threshold_Front">
-     <property name="geometry">
-      <rect>
-       <x>421</x>
-       <y>740</y>
-       <width>121</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Threshold:</string>
-     </property>
-    </widget>
-    <widget class="QSlider" name="slider_WindowWidth_Front">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>680</y>
-       <width>401</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>4095</number>
-     </property>
-     <property name="value">
-      <number>200</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_Layer_Front">
-     <property name="geometry">
-      <rect>
-       <x>421</x>
-       <y>710</y>
-       <width>121</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Layer:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_image_front">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>50</y>
-       <width>512</width>
-       <height>512</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>2</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>2</number>
-     </property>
-     <property name="midLineWidth">
-      <number>0</number>
-     </property>
-     <property name="text">
-      <string>Front view</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButton_ViewLayersFront">
-     <property name="geometry">
-      <rect>
-       <x>280</x>
-       <y>600</y>
-       <width>131</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>View in Layers</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButton_3DFront">
-     <property name="geometry">
-      <rect>
-       <x>160</x>
-       <y>600</y>
-       <width>116</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>View in 3D</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButton_DepthMapFront">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>600</y>
-       <width>141</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>View Depth Map</string>
-     </property>
-    </widget>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>110</x>
       <y>10</y>
       <width>561</width>
       <height>771</height>
@@ -326,7 +45,7 @@
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="tab">
+    <widget class="QWidget" name="tabXYLayer">
      <attribute name="title">
       <string>XY View in Layers</string>
      </attribute>
@@ -366,7 +85,7 @@
       <property name="geometry">
        <rect>
         <x>420</x>
-        <y>600</y>
+        <y>570</y>
         <width>111</width>
         <height>20</height>
        </rect>
@@ -379,7 +98,7 @@
       <property name="geometry">
        <rect>
         <x>420</x>
-        <y>660</y>
+        <y>650</y>
         <width>121</width>
         <height>20</height>
        </rect>
@@ -392,7 +111,7 @@
       <property name="geometry">
        <rect>
         <x>39</x>
-        <y>660</y>
+        <y>650</y>
         <width>351</width>
         <height>30</height>
        </rect>
@@ -411,7 +130,7 @@
       <property name="geometry">
        <rect>
         <x>39</x>
-        <y>630</y>
+        <y>610</y>
         <width>351</width>
         <height>30</height>
        </rect>
@@ -452,7 +171,7 @@
       <property name="geometry">
        <rect>
         <x>420</x>
-        <y>630</y>
+        <y>610</y>
         <width>111</width>
         <height>20</height>
        </rect>
@@ -465,7 +184,7 @@
       <property name="geometry">
        <rect>
         <x>39</x>
-        <y>600</y>
+        <y>570</y>
         <width>351</width>
         <height>30</height>
        </rect>
@@ -481,7 +200,7 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_2">
+    <widget class="QWidget" name="tabXY3D">
      <attribute name="title">
       <string>XY View in 3D</string>
      </attribute>
@@ -513,13 +232,280 @@
      </widget>
     </widget>
    </widget>
+   <widget class="QTabWidget" name="tabWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>10</y>
+      <width>561</width>
+      <height>771</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tabXZLayer">
+     <attribute name="title">
+      <string>XZ View in Layers</string>
+     </attribute>
+     <widget class="QLabel" name="label_image_front">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>512</width>
+        <height>512</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>2</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="text">
+       <string>Front view</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="Slider_Threshold_Front">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>690</y>
+        <width>351</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>-1024</number>
+      </property>
+      <property name="maximum">
+       <number>3071</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Width_Front">
+      <property name="geometry">
+       <rect>
+        <x>421</x>
+        <y>610</y>
+        <width>111</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Width:</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="slider_WindowWidth_Front">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>610</y>
+        <width>351</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>4095</number>
+      </property>
+      <property name="value">
+       <number>200</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Layer_Front">
+      <property name="geometry">
+       <rect>
+        <x>421</x>
+        <y>650</y>
+        <width>121</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Layer:</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="slider_LayerNr_Front">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>650</y>
+        <width>351</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>0</number>
+      </property>
+      <property name="maximum">
+       <number>511</number>
+      </property>
+      <property name="value">
+       <number>305</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Start_Front">
+      <property name="geometry">
+       <rect>
+        <x>421</x>
+        <y>570</y>
+        <width>111</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start:</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="slider_StartValue_Front">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>570</y>
+        <width>351</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>-1024</number>
+      </property>
+      <property name="maximum">
+       <number>4095</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Threshold_Front">
+      <property name="geometry">
+       <rect>
+        <x>421</x>
+        <y>690</y>
+        <width>121</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Threshold:</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabXZ3D">
+     <attribute name="title">
+      <string>XZ View in 3D</string>
+     </attribute>
+     <widget class="QPushButton" name="pushButton_3D_Front">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>560</y>
+        <width>90</width>
+        <height>29</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>3D</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>1250</x>
+      <y>10</y>
+      <width>561</width>
+      <height>771</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>reconstructed Lyer</string>
+     </attribute>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>580</y>
+        <width>121</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Move layer along the trajectory</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QSlider" name="horizontalSlider">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>600</y>
+        <width>331</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>512</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>512</width>
+        <height>512</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>reconstructed Lyer</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1763</width>
+     <width>1836</width>
      <height>25</height>
     </rect>
    </property>

@@ -32,6 +32,37 @@ int MyLib::windowing(int HU_value, int startValue, int windowWidth, int& iGrauwe
 int MyLib::getSlice(const image3D& image, const Reconstruction& param, image2D& im2D){
     int error_stat = 0;
     //param.
+    //try {
+        for (int i = 0; i <= im2D.width; i++) {
+            for (int j = 0; j < im2D.height; j++){
+                // normalize param.xdir and param.ydir vectors
+                double xdirVecLength = 1;
+                double ydirVecLength = 1;
+                double dx = (i-im2D.width/2)*param.xdir.x/xdirVecLength + (j-im2D.height/2)*param.ydir.x/ydirVecLength;
+                double dy = (i-im2D.width/2)*param.xdir.y/xdirVecLength + (j-im2D.height/2)*param.ydir.y/ydirVecLength;
+                double dz = (i-im2D.width/2)*param.xdir.z/xdirVecLength + (j-im2D.height/2)*param.ydir.z/ydirVecLength;
+
+                int x = (int) dx;
+                int y = (int) dy;
+                int z = (int) dz;
+                int iGrayVal;
+                int iIndex = x+ y*image.height  + z*image.height*image.slices;
+
+                if (x>=0 && x<image.width && y>=0 && y<image.height && z>=0 && z<image.slices){//&& iIndex>=0 && iIndex< image.width*image.height*image.slices){
+                    int iHuVal = image.pImage[iIndex];
+                    iGrayVal = iHuVal;
+                    //int error_stat = MyLib::windowing(iHuVal, startValue, windowWidth, iGrayVal);
+                }
+                else{
+                    iGrayVal = 0;
+                }
+                im2D.pImage[i+ j*image.height] = iGrayVal;
+            }
+        }
+
+    //} catch () {
+
+    //}
     return error_stat;
 }
 

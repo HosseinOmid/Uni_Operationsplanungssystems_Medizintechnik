@@ -63,6 +63,7 @@ private slots:
     //void updateTiefenkarteView();
     void update3Dreflection();
     void update3DreflectionFront();
+    void reconstructSlice();
 
     //void mousePressEvent(QMouseEvent *event);
 
