@@ -12,8 +12,8 @@ SWEIDMT::SWEIDMT(QWidget *parent) :
     ui->tabWidget->addTab(m_pWidget, "Load Image");
     m_pWidget->setData(&m_data);
 
-    m_pView3D = new View3D(this);
-    ui->tabWidget->addTab(m_pView3D, "View Image");
+    //m_pView3D = new View3D(this);
+    //ui->tabWidget->addTab(m_pView3D, "View Image");
 
     connect(m_pWidget, SIGNAL(LOG(QString)), this, SLOT(LOG(QString)));
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1836</width>
+    <width>1864</width>
     <height>860</height>
    </rect>
   </property>
@@ -20,36 +20,23 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="pushButton_load3D">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>80</y>
-      <width>90</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Load Data</string>
-    </property>
-   </widget>
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>140</x>
       <y>10</y>
       <width>561</width>
       <height>771</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabXYLayer">
      <attribute name="title">
       <string>XY View in Layers</string>
      </attribute>
-     <widget class="QLabel" name="label_image">
+     <widget class="QLabel" name="label_imageXY">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -65,10 +52,10 @@
        <number>2</number>
       </property>
       <property name="text">
-       <string>Top view</string>
+       <string>Layer View</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_Threshold">
+     <widget class="QLabel" name="label_ThresholdXY">
       <property name="geometry">
        <rect>
         <x>420</x>
@@ -81,7 +68,7 @@
        <string>Threshold:</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_Start">
+     <widget class="QLabel" name="label_StartXY">
       <property name="geometry">
        <rect>
         <x>420</x>
@@ -94,7 +81,7 @@
        <string>Start:</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_Layer">
+     <widget class="QLabel" name="label_LayerXY">
       <property name="geometry">
        <rect>
         <x>420</x>
@@ -107,7 +94,7 @@
        <string>Layer:</string>
       </property>
      </widget>
-     <widget class="QSlider" name="slider_LayerNr">
+     <widget class="QSlider" name="slider_LayerNrXY">
       <property name="geometry">
        <rect>
         <x>39</x>
@@ -126,7 +113,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QSlider" name="slider_WindowWidth">
+     <widget class="QSlider" name="slider_WindowWidthXY">
       <property name="geometry">
        <rect>
         <x>39</x>
@@ -148,7 +135,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QSlider" name="Slider_Threshold">
+     <widget class="QSlider" name="Slider_ThresholdXY">
       <property name="geometry">
        <rect>
         <x>39</x>
@@ -167,7 +154,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_Width">
+     <widget class="QLabel" name="label_WidthXY">
       <property name="geometry">
        <rect>
         <x>420</x>
@@ -180,7 +167,7 @@
        <string>Width:</string>
       </property>
      </widget>
-     <widget class="QSlider" name="slider_StartValue">
+     <widget class="QSlider" name="slider_StartValueXY">
       <property name="geometry">
        <rect>
         <x>39</x>
@@ -204,11 +191,11 @@
      <attribute name="title">
       <string>XY View in 3D</string>
      </attribute>
-     <widget class="QPushButton" name="pushButton_3D">
+     <widget class="QPushButton" name="pushButton_3DXY">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>550</y>
+        <x>120</x>
+        <y>580</y>
         <width>141</width>
         <height>29</height>
        </rect>
@@ -217,11 +204,11 @@
        <string>View 3D</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_Tiefenkarte">
+     <widget class="QPushButton" name="pushButton_DepthMapXY">
       <property name="geometry">
        <rect>
-        <x>160</x>
-        <y>550</y>
+        <x>270</x>
+        <y>580</y>
         <width>141</width>
         <height>29</height>
        </rect>
@@ -230,25 +217,70 @@
        <string>View Depth Map</string>
       </property>
      </widget>
+     <widget class="QLabel" name="label_3DXY">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>512</width>
+        <height>512</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>3D View / Depth Map</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="Slider_ThresholdXY_2">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>650</y>
+        <width>351</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>-1024</number>
+      </property>
+      <property name="maximum">
+       <number>3071</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ThresholdXY_2">
+      <property name="geometry">
+       <rect>
+        <x>410</x>
+        <y>650</y>
+        <width>121</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Threshold:</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QTabWidget" name="tabWidget_2">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>710</x>
       <y>10</y>
       <width>561</width>
       <height>771</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabXZLayer">
      <attribute name="title">
       <string>XZ View in Layers</string>
      </attribute>
-     <widget class="QLabel" name="label_image_front">
+     <widget class="QLabel" name="label_imageXZ">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -276,10 +308,10 @@
        <number>0</number>
       </property>
       <property name="text">
-       <string>Front view</string>
+       <string>Layer View</string>
       </property>
      </widget>
-     <widget class="QSlider" name="Slider_Threshold_Front">
+     <widget class="QSlider" name="Slider_ThresholdXZ">
       <property name="geometry">
        <rect>
         <x>40</x>
@@ -298,7 +330,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_Width_Front">
+     <widget class="QLabel" name="label_WidthXZ">
       <property name="geometry">
        <rect>
         <x>421</x>
@@ -311,7 +343,7 @@
        <string>Width:</string>
       </property>
      </widget>
-     <widget class="QSlider" name="slider_WindowWidth_Front">
+     <widget class="QSlider" name="slider_WindowWidthXZ">
       <property name="geometry">
        <rect>
         <x>40</x>
@@ -333,7 +365,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_Layer_Front">
+     <widget class="QLabel" name="label_LayerXZ">
       <property name="geometry">
        <rect>
         <x>421</x>
@@ -346,7 +378,7 @@
        <string>Layer:</string>
       </property>
      </widget>
-     <widget class="QSlider" name="slider_LayerNr_Front">
+     <widget class="QSlider" name="slider_LayerNrXZ">
       <property name="geometry">
        <rect>
         <x>40</x>
@@ -368,7 +400,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_Start_Front">
+     <widget class="QLabel" name="label_StartXZ">
       <property name="geometry">
        <rect>
         <x>421</x>
@@ -381,7 +413,7 @@
        <string>Start:</string>
       </property>
      </widget>
-     <widget class="QSlider" name="slider_StartValue_Front">
+     <widget class="QSlider" name="slider_StartValueXZ">
       <property name="geometry">
        <rect>
         <x>40</x>
@@ -400,7 +432,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_Threshold_Front">
+     <widget class="QLabel" name="label_ThresholdXZ">
       <property name="geometry">
        <rect>
         <x>421</x>
@@ -418,17 +450,75 @@
      <attribute name="title">
       <string>XZ View in 3D</string>
      </attribute>
-     <widget class="QPushButton" name="pushButton_3D_Front">
+     <widget class="QLabel" name="label_3DXZ">
       <property name="geometry">
        <rect>
-        <x>190</x>
-        <y>560</y>
-        <width>90</width>
+        <x>20</x>
+        <y>30</y>
+        <width>512</width>
+        <height>512</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>3D View / Depth Map</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_3DXZ">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>580</y>
+        <width>141</width>
         <height>29</height>
        </rect>
       </property>
       <property name="text">
-       <string>3D</string>
+       <string>View 3D</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_DepthMapXZ">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>580</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Vew Depth Map</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ThresholdXZ_2">
+      <property name="geometry">
+       <rect>
+        <x>410</x>
+        <y>650</y>
+        <width>121</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Threshold:</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="Slider_ThresholdXZ_2">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>650</y>
+        <width>351</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>-1024</number>
+      </property>
+      <property name="maximum">
+       <number>3071</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </widget>
@@ -436,7 +526,7 @@
    <widget class="QTabWidget" name="tabWidget_3">
     <property name="geometry">
      <rect>
-      <x>1250</x>
+      <x>1280</x>
       <y>10</y>
       <width>561</width>
       <height>771</height>
@@ -499,13 +589,45 @@
      </widget>
     </widget>
    </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>120</width>
+      <height>781</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Set Up</string>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+    <widget class="QPushButton" name="pushButton_load3D">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>101</width>
+       <height>29</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load Data</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1836</width>
+     <width>1864</width>
      <height>25</height>
     </rect>
    </property>

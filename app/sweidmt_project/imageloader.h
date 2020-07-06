@@ -48,21 +48,25 @@ private:
 
 private slots:
     void loadData();
-    void updateWindowingStart(int value);
-    void updateWindowingWidth(int value);
-    void updateLayerNr(int value);
-    void updateTreshold(int value);
+    void updateWindowingStartXY(int value);
+    void updateWindowingWidthXY(int value);
+    void updateLayerNrXY(int value);
+    void updateTresholdXY(int value);
+    void updateTresholdXY_2(int value);
 
     void updateAllSlidernLabels();
-    void updateWindowingStartFront(int value);
-    void updateWindowingWidthFront(int value);
-    void updateLayerNrFront(int value);
-    void updateTresholdFront(int value);
+    void updateWindowingStartXZ(int value);
+    void updateWindowingWidthXZ(int value);
+    void updateLayerNrXZ(int value);
+    void updateTresholdXZ(int value);
+    void updateTresholdXZ_2(int value);
 
     void updateView();
     //void updateTiefenkarteView();
-    void update3Dreflection();
-    void update3DreflectionFront();
+    void update3DreflectionXY();
+    void update3DreflectionXZ();
+    void updateDepthMapXY();
+    void updateDepthMapXZ();
     void reconstructSlice();
 
     //void mousePressEvent(QMouseEvent *event);

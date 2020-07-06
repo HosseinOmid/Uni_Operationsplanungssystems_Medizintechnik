@@ -22,24 +22,21 @@ ImageLoader::ImageLoader(QWidget *parent)
     // connect events of GUI with funktions
     ui->setupUi(this);
     connect(ui->pushButton_load3D, SIGNAL(clicked()), this, SLOT(loadData()));
-    //connect(ui->pushButton_Tiefenkarte, SIGNAL(clicked()), this, SLOT(updateTiefenkarteView()));
-    connect(ui->pushButton_3D, SIGNAL(clicked()), this, SLOT(update3Dreflection()));
-    connect(ui->pushButton_3D_Front, SIGNAL(clicked()), this, SLOT(update3DreflectionFront()));
-    connect(ui->slider_StartValue, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStart(int)));
-    connect(ui->slider_WindowWidth, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidth(int)));
-    connect(ui->slider_LayerNr, SIGNAL(valueChanged(int)), this, SLOT(updateLayerNr(int)));
-    connect(ui->Slider_Threshold, SIGNAL(valueChanged(int)), this, SLOT(updateTreshold(int)));
-    connect(ui->slider_StartValue_Front, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStartFront(int)));
-    connect(ui->slider_WindowWidth_Front, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidthFront(int)));
-    connect(ui->slider_LayerNr_Front, SIGNAL(valueChanged(int)), this, SLOT(updateLayerNrFront(int)));
-    connect(ui->Slider_Threshold_Front, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdFront(int)));
+    connect(ui->pushButton_DepthMapXZ, SIGNAL(clicked()), this, SLOT(updateDepthMapXY()));
+    connect(ui->pushButton_DepthMapXZ, SIGNAL(clicked()), this, SLOT(updateDepthMapXZ()));
+    connect(ui->pushButton_3DXY, SIGNAL(clicked()), this, SLOT(update3DreflectionXY()));
+    connect(ui->pushButton_3DXZ, SIGNAL(clicked()), this, SLOT(update3DreflectionXZ()));
+    connect(ui->slider_StartValueXY, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStartXY(int)));
+    connect(ui->slider_WindowWidthXY, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidthXY(int)));
+    connect(ui->slider_LayerNrXY, SIGNAL(valueChanged(int)), this, SLOT(updateLayerNrXY(int)));
+    connect(ui->Slider_ThresholdXY, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXY(int)));
+    connect(ui->slider_StartValueXZ, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStartXZ(int)));
+    connect(ui->slider_WindowWidthXZ, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidthXZ(int)));
+    connect(ui->slider_LayerNrXZ, SIGNAL(valueChanged(int)), this, SLOT(updateLayerNrXZ(int)));
+    connect(ui->Slider_ThresholdXZ, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXZ(int)));
+    connect(ui->Slider_ThresholdXZ_2, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXZ_2(int)));
+    connect(ui->Slider_ThresholdXY_2, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXY_2(int)));
     connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(updateView()));
-    //connect(ui->radioButton_DepthMap, SIGNAL(toggled()), this, SLOT(updateView()));
-    //connect(ui->radioButton_3D, SIGNAL(toggled()), this, SLOT(updateView()));
-    //connect(ui->radioButton_ViewLayers, SIGNAL(toggled()), this, SLOT(updateView()));
-    //connect(ui->radioButton_DepthMapFront, SIGNAL(toggled()), this, SLOT(updateView()));
-    //connect(ui->radioButton_3DFront, SIGNAL(toggled()), this, SLOT(updateView()));
-    //connect(ui->radioButton_ViewLayersFront, SIGNAL(toggled()), this, SLOT(updateView()));
 
     ImageLoader::updateAllSlidernLabels();
 }
@@ -143,118 +140,73 @@ void ImageLoader::reconstructSlice(){
     updateView();
 }
 */
-void ImageLoader::updateView()
-{
+void ImageLoader::updateView(){
     // get the data from the database
     const image3D tmp_im3D = m_pData->getImageData3D();
-
     // creat objects of type QImage to visualize it in GUI
-    QImage image(tmp_im3D.width,tmp_im3D.height, QImage::Format_RGB32);
-    QImage imageFront(tmp_im3D.width,tmp_im3D.slices, QImage::Format_RGB32);
+    QImage imageXY(tmp_im3D.width,tmp_im3D.height, QImage::Format_RGB32);
+    QImage imageXZ(tmp_im3D.width,tmp_im3D.slices, QImage::Format_RGB32);
 
     // read values from the GUI
-    int startValue = ui->slider_StartValue->value();
-    int windowWidth = ui->slider_WindowWidth->value();
-    int layerNr = ui->slider_LayerNr->value();
-    int treshold = ui->Slider_Threshold->value();
-
-    int startValueFront = ui->slider_StartValue_Front->value();
-    int windowWidthFront = ui->slider_WindowWidth_Front->value();
-    int layerNrFront = ui->slider_LayerNr_Front->value();
-    int tresholdFront = ui->Slider_Threshold_Front->value();
+    int startValueXY = ui->slider_StartValueXY->value();
+    int windowWidthXY = ui->slider_WindowWidthXY->value();
+    int layerNrXY = ui->slider_LayerNrXY->value();
+    int tresholdXY = ui->Slider_ThresholdXY->value();
+    int startValueXZ = ui->slider_StartValueXZ->value();
+    int windowWidthXZ = ui->slider_WindowWidthXZ->value();
+    int layerNrXZ = ui->slider_LayerNrXZ->value();
+    int tresholdXZ = ui->Slider_ThresholdXZ->value();
 
 
     if (true){
         // ------- Top-View -------------------------------------------------------------
         for (int i = 0; i < tmp_im3D.width; i++){
             for (int j = 0; j < tmp_im3D.height; j++){
-                int index = j * tmp_im3D.width + i + tmp_im3D.width*tmp_im3D.height*layerNr ;
+                int index = j * tmp_im3D.width + i + tmp_im3D.width*tmp_im3D.height*layerNrXY ;
                 int HU_value = tmp_im3D.pImage[index];
                 int iGrauwert;
-                int error_stat = MyLib::windowing(HU_value, startValue, windowWidth, iGrauwert);
-                image.setPixel(i,j,qRgb(iGrauwert, iGrauwert, iGrauwert));
+                int error_stat = MyLib::windowing(HU_value, startValueXY, windowWidthXY, iGrauwert);
+                imageXY.setPixel(i,j,qRgb(iGrauwert, iGrauwert, iGrauwert));
             }
         }
     }
     if(true){
         //-------------- front view -----------------------------------------------------
-        for (int i = 0; i < 512; i++){
-            for (int z = 0; z < 512; z++){
-                int index = layerNrFront * 512 + i + 512*512*z ;
+        for (int i = 0; i < tmp_im3D.width; i++){
+            for (int z = 0; z < tmp_im3D.slices; z++){
+                int index = layerNrXZ * tmp_im3D.width + i + tmp_im3D.width*tmp_im3D.height*z ;
                 int HU_value = tmp_im3D.pImage[index];
                 int iGrauwert;
-                int error_stat = MyLib::windowing(HU_value, startValueFront, windowWidthFront, iGrauwert);
-                imageFront.setPixel(i,z,qRgb(iGrauwert, iGrauwert, iGrauwert));
+                int error_stat = MyLib::windowing(HU_value, startValueXZ, windowWidthXZ, iGrauwert);
+                imageXZ.setPixel(i,z,qRgb(iGrauwert, iGrauwert, iGrauwert));
             }
         }
     }
-    if (false) {
-        //-------------- top view -----------------------------------------------------
-        bool stat = m_pData->calculateDepthMap(treshold);
-        const image2D* tmpDepthMap = m_pData->getDepthMap();
-        image2D im2D = image2D(tmpDepthMap->width,tmpDepthMap->height);
-        stat = MyLib::calc3Dreflection(tmpDepthMap, im2D);
-        for (int i = 0; i < tmpDepthMap->width; i++){
-            for (int j = 0; j < tmpDepthMap->height; j++){
-                int iReflection = tmpDepthMap->pImage[i + tmpDepthMap->width*j];
-                image.setPixel(i,j,qRgb(iReflection, iReflection, iReflection));
-            }
-        }
-    }
-    if (false) {
-        //-------------- front view -----------------------------------------------------
-        bool stat = m_pData->calculateDepthMapFront(tresholdFront);
-        const image2D* tmpDepthMap = m_pData->getDepthMapFront();
-        image2D im2D = image2D(tmpDepthMap->width,tmpDepthMap->height);
-        stat = MyLib::calc3Dreflection(tmpDepthMap, im2D);
-        for (int i = 0; i < tmpDepthMap->width; i++){
-            for (int z = 0; z < tmpDepthMap->height; z++){
-                int iReflection = tmpDepthMap->pImage[i + tmpDepthMap->width*z];
-                imageFront.setPixel(i,z,qRgb(iReflection, iReflection, iReflection));
-            }
-        }
-    }
-    if (false) {
-        //-------------- top view -----------------------------------------------------
-        bool stat = m_pData->calculateDepthMap(treshold);
-        const image2D* tmpDepthMap = m_pData->getDepthMap();
-        for (int i = 0; i < tmpDepthMap->width; i++){
-            for (int j = 0; j < tmpDepthMap->height; j++){
-                int iDepth = tmpDepthMap->pImage[i + tmpDepthMap->width*j];
-                image.setPixel(i,j,qRgb(iDepth, iDepth, iDepth));
-            }
-        }
-    }
-    if (false) {
-
-    }
-
-
     // ------- draw lines & squares showing the current layers -------------------------------
     // draw a yellow line which shows the front layer view
     for (int i = 0; i < 512; i++) {
-        image.setPixel(i,layerNrFront,qRgb(255, 255, 0));
+        imageXY.setPixel(i,layerNrXZ,qRgb(255, 255, 0));
     }
     // draw a green square around the top view
     for (int i = 0; i < 512; i++) {
         for (int j = 0; j < 3; j++){
-            imageFront.setPixel(i,j,qRgb(255, 255, 0));
-            imageFront.setPixel(j,i,qRgb(255, 255, 0));
-            imageFront.setPixel(i,511-j,qRgb(255, 255, 0));
-            imageFront.setPixel(511-j,i,qRgb(255, 255, 0));
+            imageXZ.setPixel(i,j,qRgb(255, 255, 0));
+            imageXZ.setPixel(j,i,qRgb(255, 255, 0));
+            imageXZ.setPixel(i,511-j,qRgb(255, 255, 0));
+            imageXZ.setPixel(511-j,i,qRgb(255, 255, 0));
         }
     }
     // draw a green line which shows the top layer view
     for (int i = 0; i < 512; i++) {
-        imageFront.setPixel(i,layerNr,qRgb(0, 255, 0));
+        imageXZ.setPixel(i,layerNrXY,qRgb(0, 255, 0));
     }
     // draw a green square around the top view
     for (int i = 0; i < 512; i++) {
         for (int j = 0; j < 3; j++){
-            image.setPixel(i,j,qRgb(0, 255, 0));
-            image.setPixel(j,i,qRgb(0, 255, 0));
-            image.setPixel(i,511-j,qRgb(0, 255, 0));
-            image.setPixel(511-j,i,qRgb(0, 255, 0));
+            imageXY.setPixel(i,j,qRgb(0, 255, 0));
+            imageXY.setPixel(j,i,qRgb(0, 255, 0));
+            imageXY.setPixel(i,511-j,qRgb(0, 255, 0));
+            imageXY.setPixel(511-j,i,qRgb(0, 255, 0));
         }
     }
 
@@ -264,25 +216,25 @@ void ImageLoader::updateView()
             float tanLine = (firstPoint.y - secPoint.y)/(firstPoint.x - secPoint.x);
             float dj = (i-secPoint.x)* tanLine + secPoint.y;
             int j = (int)dj;
-            image.setPixel(i,j,qRgb(255, 0, 0));
+            imageXY.setPixel(i,j,qRgb(255, 0, 0));
         }
         for (float j = 0; j < 512; j++) {
             float tanLine = (firstPoint.x - secPoint.x)/(firstPoint.y - secPoint.y);
             float di = (j-secPoint.y)* tanLine + secPoint.x;
             int i = (int)di;
-            image.setPixel(i,j,qRgb(255, 0, 0));
+            imageXY.setPixel(i,j,qRgb(255, 0, 0));
         }
         // draw a circle around the second point
         for (int i = 0; i<=512 ; i++){
                 for (int j = 0; j<=512 ; j++){
                     if(pow(i- secPoint.x,2) + pow(j-secPoint.y,2) < 36 ){
-                        image.setPixel(i,j, qRgb(255, 0, 0));
+                        imageXY.setPixel(i,j, qRgb(255, 0, 0));
                     }
                 }
          }
         // draw a line which visualize the second point selected in the top view in front view
         for (int z = 0; z < 512 ; z++){
-            imageFront.setPixel(secPoint.x,z, qRgb(255, 0, 0));
+            imageXZ.setPixel(secPoint.x,z, qRgb(255, 0, 0));
          }
     }
     if (countPoint==2 || countPoint==3) // first point got selected/updated
@@ -291,13 +243,13 @@ void ImageLoader::updateView()
         for (int i = 0; i < 512 ; i++){
                 for (int j = 0; j < 512 ; j++){
                     if(pow(i- firstPoint.x,2) + pow(j-firstPoint.y,2) < 36 ){
-                        image.setPixel(i,j, qRgb(255, 0, 0));
+                        imageXY.setPixel(i,j, qRgb(255, 0, 0));
                     }
                 }
          }
         // draw a line which visualize the first point selected in the top view in front view
         for (int z = 0; z < 512 ; z++){
-            imageFront.setPixel(firstPoint.x,z, qRgb(255, 0, 0));
+            imageXZ.setPixel(firstPoint.x,z, qRgb(255, 0, 0));
          }
     }
 
@@ -308,25 +260,25 @@ void ImageLoader::updateView()
             float tanLine = (firstPointFront.z - secPointFront.z)/(firstPointFront.x - secPointFront.x);
             float dj = (i-secPointFront.x)* tanLine + secPointFront.z;
             int j = (int)dj;
-            imageFront.setPixel(i,j,qRgb(255, 0, 0));
+            imageXZ.setPixel(i,j,qRgb(255, 0, 0));
         }
         for (float z = 0; z < 512; z++) {
             float tanLine = (firstPointFront.x - secPointFront.x)/(firstPointFront.z - secPointFront.z);
             float di = (z-secPointFront.z)* tanLine + secPointFront.x;
             int i = (int)di;
-            imageFront.setPixel(i,z,qRgb(255, 0, 0));
+            imageXZ.setPixel(i,z,qRgb(255, 0, 0));
         }
         // draw a circle around the second point in front view
         for (int i = 0; i<=512 ; i++){
                 for (int z = 0; z<=512 ; z++){
                     if(pow(i- secPointFront.x,2) + pow(z-secPointFront.z,2) < 36 ){
-                        imageFront.setPixel(i,z, qRgb(255, 0, 0));
+                        imageXZ.setPixel(i,z, qRgb(255, 0, 0));
                     }
                 }
          }
         // draw a line which visualize the second point selected in the front view in top view
         for (int j = 0; j < 512 ; j++){
-            image.setPixel(secPointFront.x,j, qRgb(255, 0, 0));
+            imageXY.setPixel(secPointFront.x,j, qRgb(255, 0, 0));
          }
     }
     if (countPointFront==2 || countPointFront==3) // first point got selected/updated
@@ -335,22 +287,22 @@ void ImageLoader::updateView()
         for (int i = 0; i<=512 ; i++){
                 for (int z = 0; z<=512 ; z++){
                     if(pow(i- firstPointFront.x,2) + pow(z-firstPointFront.z,2) < 36 ){
-                        imageFront.setPixel(i,z, qRgb(255, 0, 0));
+                        imageXZ.setPixel(i,z, qRgb(255, 0, 0));
                     }
                 }
          }
         // draw a line which visualize the first point selected in the front view in top view
         for (int j = 0; j < 512 ; j++){
-            image.setPixel(firstPointFront.x,j, qRgb(255, 0, 0));
+            imageXY.setPixel(firstPointFront.x,j, qRgb(255, 0, 0));
          }
     }
 
 
     // ------- update pics in the GUI -----------------------------------------
     // Bild auf Benutzeroberfläche anzeigen
-    ui->label_image->setPixmap(QPixmap::fromImage(image));
+    ui->label_imageXY->setPixmap(QPixmap::fromImage(imageXY));
     // Bild auf Benutzeroberfläche anzeigen
-    ui->label_image_front->setPixmap(QPixmap::fromImage(imageFront));
+    ui->label_imageXZ->setPixmap(QPixmap::fromImage(imageXZ));
 
 
     //
@@ -367,7 +319,7 @@ void ImageLoader::updateView()
             int iIndex = x+y*512+z*512*512;
             if (x>=0 && x<tmp_im3D.width && y>=0 && y<tmp_im3D.height && z>=0 && z<tmp_im3D.slices){
                 int iHuVal = tmp_im3D.pImage[iIndex];
-                int error_stat = MyLib::windowing(iHuVal, startValue, windowWidth, iGrayVal);
+                int error_stat = MyLib::windowing(iHuVal, startValueXY, windowWidthXY, iGrayVal);
             }
             else{
                 iGrayVal = 0;
@@ -392,24 +344,26 @@ void ImageLoader::loadData(){
     }
 }
 
-// reserve functions --------------------------------------------------------
-void ImageLoader::update3Dreflection(){
-    int treshold = ui->Slider_Threshold->value();
+// fuctions for other features --------------------------------------------------------
+void ImageLoader::update3DreflectionXY(){
+    int treshold = ui->Slider_ThresholdXY_2->value();
     bool stat = m_pData->calculateDepthMap(treshold);
     const image2D* tmpTiefenkarte = m_pData->getDepthMap();
+    image2D im2D = image2D(tmpTiefenkarte->width,tmpTiefenkarte->height);
+    stat = MyLib::calc3Dreflection(tmpTiefenkarte, im2D);
     // Erzeugen ein Objekt vom Typ QImage
     QImage image(512,512, QImage::Format_RGB32);
-    for (int i = 1; i < 511; i++){
-        for (int j = 1; j < 511; j++){
-            int iReflection = tmpTiefenkarte->pImage[i + 512*j];
+    for (int i = 1; i < im2D.width-1; i++){
+        for (int j = 1; j < im2D.height-1; j++){
+            int iReflection = im2D.pImage[i + j*im2D.width];
             image.setPixel(i,j,qRgb(iReflection, iReflection, iReflection));
         }
     }
     // Bild auf Benutzeroberfläche anzeigen
-    ui->label_image->setPixmap(QPixmap::fromImage(image));
+    ui->label_3DXY->setPixmap(QPixmap::fromImage(image));
 }
-void ImageLoader::update3DreflectionFront(){
-    int tresholdFront = ui->Slider_Threshold_Front->value();
+void ImageLoader::update3DreflectionXZ(){
+    int tresholdFront = ui->Slider_ThresholdXZ_2->value();
     bool stat = m_pData->calculateDepthMapFront(tresholdFront);
     const image2D* tmpTiefenkarte = m_pData->getDepthMapFront();
     image2D im2D = image2D(tmpTiefenkarte->width,tmpTiefenkarte->height);
@@ -423,59 +377,101 @@ void ImageLoader::update3DreflectionFront(){
         }
     }
     // Bild auf Benutzeroberfläche anzeigen
-    ui->label_image_front->setPixmap(QPixmap::fromImage(image));
+    ui->label_3DXZ->setPixmap(QPixmap::fromImage(image));
+}
+void ImageLoader::updateDepthMapXY(){
+    int treshold = ui->Slider_ThresholdXY_2->value();
+    bool stat = m_pData->calculateDepthMap(treshold);
+    const image2D* tmpTiefenkarte = m_pData->getDepthMap();
+    // Erzeugen ein Objekt vom Typ QImage
+    QImage image(512,512, QImage::Format_RGB32);
+    for (int i = 1; i < 511; i++){
+        for (int j = 1; j < 511; j++){
+            int iReflection = tmpTiefenkarte->pImage[i + 512*j];
+            image.setPixel(i,j,qRgb(iReflection, iReflection, iReflection));
+        }
+    }
+    // Bild auf Benutzeroberfläche anzeigen
+    ui->label_3DXY->setPixmap(QPixmap::fromImage(image));
+}
+void ImageLoader::updateDepthMapXZ(){
+    int treshold = ui->Slider_ThresholdXY_2->value();
+    bool stat = m_pData->calculateDepthMapFront(treshold);
+    const image2D* tmpTiefenkarte = m_pData->getDepthMapFront();
+    image2D im2D = image2D(tmpTiefenkarte->width,tmpTiefenkarte->height);
+    stat = MyLib::calc3Dreflection(tmpTiefenkarte, im2D);
+    // Erzeugen ein Objekt vom Typ QImage
+    QImage image(512,512, QImage::Format_RGB32);
+    for (int i = 1; i < 511; i++){
+        for (int j = 1; j < 511; j++){
+            int iReflection = tmpTiefenkarte->pImage[i + 512*j];
+            image.setPixel(i,j,qRgb(iReflection, iReflection, iReflection));
+        }
+    }
+    // Bild auf Benutzeroberfläche anzeigen
+    ui->label_3DXZ->setPixmap(QPixmap::fromImage(image));
 }
 
 // GUI functions ------------------------------------------------------------
-void ImageLoader::updateWindowingStart(int value){
-    ui->label_Start->setText("Start: " + QString::number(value));
+void ImageLoader::updateWindowingStartXY(int value){
+    ui->label_StartXY->setText("Start: " + QString::number(value));
     updateView();
 }
-void ImageLoader::updateWindowingWidth(int value){
-    ui->label_Width->setText("Width: " + QString::number(value));
+void ImageLoader::updateWindowingWidthXY(int value){
+    ui->label_WidthXY->setText("Width: " + QString::number(value));
     updateView();
 }
-void ImageLoader::updateLayerNr(int value){
-    ui->label_Layer->setText("Layer: " + QString::number(value));
+void ImageLoader::updateLayerNrXY(int value){
+    ui->label_LayerXY->setText("Layer: " + QString::number(value));
     updateView();
 }
-void ImageLoader::updateTreshold(int value){
-    ui->label_Threshold->setText("Threshold: " + QString::number(value));
+void ImageLoader::updateTresholdXY(int value){
+    ui->label_ThresholdXY->setText("Threshold: " + QString::number(value));
     updateView();
 }
-void ImageLoader::updateWindowingStartFront(int value){
-    ui->label_Start_Front->setText("Start: " + QString::number(value));
+void ImageLoader::updateTresholdXY_2(int value){
+    ui->label_ThresholdXY_2->setText("Threshold: " + QString::number(value));
+}
+void ImageLoader::updateWindowingStartXZ(int value){
+    ui->label_StartXZ->setText("Start: " + QString::number(value));
     updateView();
 }
-void ImageLoader::updateWindowingWidthFront(int value){
-    ui->label_Width_Front->setText("Width: " + QString::number(value));
+void ImageLoader::updateWindowingWidthXZ(int value){
+    ui->label_WidthXZ->setText("Width: " + QString::number(value));
     updateView();
 }
-void ImageLoader::updateLayerNrFront(int value){
-    ui->label_Layer_Front->setText("Layer: " + QString::number(value));
+void ImageLoader::updateLayerNrXZ(int value){
+    ui->label_LayerXZ->setText("Layer: " + QString::number(value));
     updateView();
 }
-void ImageLoader::updateTresholdFront(int value){
-    ui->label_Threshold_Front->setText("Threshold: " + QString::number(value));
+void ImageLoader::updateTresholdXZ(int value){
+    ui->label_ThresholdXZ->setText("Threshold: " + QString::number(value));
     updateView();
+}
+void ImageLoader::updateTresholdXZ_2(int value){
+    ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(value));
 }
 void ImageLoader::updateAllSlidernLabels(){
     // update text labels at the beginning
-    int startValue = ui->slider_StartValue->value();
-    int windowWidth = ui->slider_WindowWidth->value();
-    int layerNr = ui->slider_LayerNr->value();
-    int treshold = ui->Slider_Threshold->value();
-    ui->label_Start->setText("Start: " + QString::number(startValue));
-    ui->label_Width->setText("Width: " + QString::number(windowWidth));
-    ui->label_Layer->setText("Layer: " + QString::number(layerNr));
-    ui->label_Threshold->setText("Threshold: " + QString::number(treshold));
+    int startValue = ui->slider_StartValueXY->value();
+    int windowWidth = ui->slider_WindowWidthXY->value();
+    int layerNr = ui->slider_LayerNrXY->value();
+    int treshold = ui->Slider_ThresholdXY->value();
+    int treshold_2 = ui->Slider_ThresholdXY_2->value();
+    ui->label_StartXY->setText("Start: " + QString::number(startValue));
+    ui->label_WidthXY->setText("Width: " + QString::number(windowWidth));
+    ui->label_LayerXY->setText("Layer: " + QString::number(layerNr));
+    ui->label_ThresholdXY->setText("Threshold: " + QString::number(treshold));
+    ui->label_ThresholdXY_2->setText("Threshold: " + QString::number(treshold_2));
 
-    int startValueFront = ui->slider_StartValue_Front->value();
-    int windowWidthFront = ui->slider_WindowWidth_Front->value();
-    int layerNrFront = ui->slider_LayerNr_Front->value();
-    int tresholdFront = ui->Slider_Threshold_Front->value();
-    ui->label_Start_Front->setText("Start: " + QString::number(startValueFront));
-    ui->label_Width_Front->setText("Width: " + QString::number(windowWidthFront));
-    ui->label_Layer_Front->setText("Layer: " + QString::number(layerNrFront));
-    ui->label_Threshold->setText("Threshold: " + QString::number(tresholdFront));
+    int startValueXZ = ui->slider_StartValueXZ->value();
+    int windowWidthXZ = ui->slider_WindowWidthXZ->value();
+    int layerNrXZ = ui->slider_LayerNrXZ->value();
+    int tresholdXZ = ui->Slider_ThresholdXZ->value();
+    int tresholdXZ_2 = ui->Slider_ThresholdXZ->value();
+    ui->label_StartXZ->setText("Start: " + QString::number(startValueXZ));
+    ui->label_WidthXZ->setText("Width: " + QString::number(windowWidthXZ));
+    ui->label_LayerXZ->setText("Layer: " + QString::number(layerNrXZ));
+    ui->label_ThresholdXZ->setText("Threshold: " + QString::number(tresholdXZ));
+    ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(tresholdXZ_2));
 }
