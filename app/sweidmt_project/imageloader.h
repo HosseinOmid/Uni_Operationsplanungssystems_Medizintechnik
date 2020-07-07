@@ -32,14 +32,21 @@ private:
     Ui::MainWindow *ui;
     ApplicationData *m_pData;
 
+    Reconstruction reco;
+    vector planeNormalVector;
     point firstPoint;
     point secPoint;
-    int countPoint;
-    bool drawLine;
-    point firstPointFront;
-    point secPointFront;
-    int countPointFront;
-    bool drawLineFront;
+    point firstPointXY;
+    point secPointXY;
+    point firstPointXZ;
+    point secPointXZ;
+    int countPointXY;
+    int countPointXZ;
+    bool drawLineXY;
+    bool drawLineXZ;
+    bool drawDrillTrajectory;
+
+    //image2D reco_im2D;
 
     //short* m_pImageData;
     //short* m_pImageData3D;
@@ -61,6 +68,8 @@ private slots:
     void updateTresholdXZ(int value);
     void updateTresholdXZ_2(int value);
 
+    void updateSliceDepth(int value);
+
     void updateView();
     //void updateTiefenkarteView();
     void update3DreflectionXY();
@@ -69,7 +78,7 @@ private slots:
     void updateDepthMapXZ();
     void reconstructSlice();
 
-    //void mousePressEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 
 signals:
     void LOG(QString str);

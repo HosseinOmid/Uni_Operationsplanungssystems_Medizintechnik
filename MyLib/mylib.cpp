@@ -31,6 +31,7 @@ int MyLib::windowing(int HU_value, int startValue, int windowWidth, int& iGrauwe
 
 int MyLib::getSlice(const image3D& image, const Reconstruction& param, image2D& im2D){
     int error_stat = 0;
+    //im2D = new image2D(512,512);
     //param.
     //try {
         for (int i = 0; i <= im2D.width; i++) {

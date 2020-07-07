@@ -12,10 +12,13 @@
 ImageLoader::ImageLoader(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow){
-    countPoint = 1;
-    drawLine = false;
-    countPointFront = 1;
-    drawLineFront = false;
+    //image2D reco_im2D =  image2D(512,512);
+    //reco_im2D = new image2D(512,512);
+    countPointXY = 1;
+    countPointXZ = 1;
+    drawLineXY = false;
+    drawLineXZ = false;
+    drawDrillTrajectory = false;
     //m_ApplicationData = new ApplicationData(this);
     //m_ApplicationData->setData(&m_data);
 
@@ -36,7 +39,11 @@ ImageLoader::ImageLoader(QWidget *parent)
     connect(ui->Slider_ThresholdXZ, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXZ(int)));
     connect(ui->Slider_ThresholdXZ_2, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXZ_2(int)));
     connect(ui->Slider_ThresholdXY_2, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXY_2(int)));
-    connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(updateView()));
+    connect(ui->Slider_SliceDepth, SIGNAL(valueChanged(int)), this, SLOT(updateSliceDepth(int)));
+
+
+    connect(ui->pushButton_reconstruct, SIGNAL(clicked()), this, SLOT(reconstructSlice()));
+
 
     ImageLoader::updateAllSlidernLabels();
 }
@@ -53,8 +60,13 @@ void ImageLoader::setData(ApplicationData *pData){
 }
 
 void ImageLoader::reconstructSlice(){
-    Reconstruction reco;
-    vector planeNormalVector;
+
+    firstPoint.x = firstPointXZ.x;
+    firstPoint.y = firstPointXY.y;
+    firstPoint.z = firstPointXZ.z;
+    secPoint.x = secPointXZ.x;
+    secPoint.y = secPointXY.y;
+    secPoint.z = secPointXZ.z;
 
     double a = secPoint.x - firstPoint.x;
     double b = secPoint.y - firstPoint.y;
@@ -63,7 +75,7 @@ void ImageLoader::reconstructSlice(){
     planeNormalVector.x = b;
     planeNormalVector.x = c;
 
-    int sliceDistToFirstPointPerc = ui->horizontalSlider->value();
+    int sliceDistToFirstPointPerc = ui->Slider_SliceDepth->value();
 
     reco.pos.x = firstPoint.x + a * sliceDistToFirstPointPerc/100;
     reco.pos.y = firstPoint.y + b * sliceDistToFirstPointPerc/100;
@@ -83,70 +95,89 @@ void ImageLoader::reconstructSlice(){
     reco.ydir.x = 1;
     reco.ydir.y = -b/(d-a);
     reco.ydir.z = (d-a + pow(b,2)/(d-a))/c;
-}
 
-/*void ImageLoader::mousePressEvent(QMouseEvent *event){
-    QPoint globalPos;
-    globalPos = event->pos();
-    QPoint localPos;
-    QPoint localPosFront;
-    localPos = ui->label_image->mapFromParent(globalPos);
-    localPosFront = ui->label_image_front->mapFromParent(globalPos);
+    // get the data from the database
+    const image3D tmp_im3D = m_pData->getImageData3D();
 
-    if (ui->label_image->rect().contains(localPos)){
-        if (countPoint == 1){
-            firstPoint.x = localPos.x();
-            firstPoint.y = localPos.y();
-            countPoint = 2;
-            emit LOG("First point got successfully chosen.");
-        }
-        else if (countPoint == 2){
-            secPoint.x = localPos.x();
-            secPoint.y = localPos.y();
-            countPoint = 3;
-            drawLine = true;
-            emit LOG("Second point got successfully chosen.");
-        }
-        else if (countPoint == 3){
-            firstPoint.x = localPos.x();
-            firstPoint.y = localPos.y();
-            countPoint = 2;
-            drawLine = true;
-            emit LOG("First point got successfully updated");
-        }
-    }
-    if (ui->label_image_front->rect().contains(localPosFront)){
-        if (countPoint == 1){
-            firstPointFront.x = localPosFront.x();
-            firstPointFront.z = localPosFront.y();
-            countPointFront = 2;
-            emit LOG("First point got successfully chosen.");
-        }
-        else if (countPointFront == 2){
-            secPointFront.x = localPosFront.x();
-            secPointFront.z = localPosFront.y();
-            countPointFront = 3;
-            drawLineFront = true;
-            emit LOG("Second point got successfully chosen.");
-        }
-        else if (countPoint == 3){
-            firstPointFront.x = localPosFront.x();
-            firstPointFront.z = localPosFront.y();
-            countPointFront = 2;
-            drawLineFront = true;
-            emit LOG("First point got successfully updated");
-        }
-    }
+    image2D reco_im2D =  image2D(512,512);
+    int err_stat = MyLib::getSlice(tmp_im3D, reco, reco_im2D);
+    drawDrillTrajectory = true;
     updateView();
 }
-*/
+
+void ImageLoader::mousePressEvent(QMouseEvent *event){
+    //if (ui->tabWidget->c){
+
+    //}
+    QPoint globalPos;
+    globalPos = event->pos();
+    QPoint localPosXY1;
+    QPoint localPosXY;
+    QPoint localPosXZ1;
+    QPoint localPosXZ;
+    localPosXY1 = ui->tabWidget->mapFromParent(globalPos);
+    localPosXY  = ui->label_imageXY->mapFromParent(localPosXY1);
+    localPosXY.setY(localPosXY.y()-30);
+
+    localPosXZ1 = ui->tabWidget_2->mapFromParent(globalPos);
+    localPosXZ  = ui->label_imageXZ->mapFromParent(localPosXZ1);
+    localPosXZ.setY(localPosXZ.y()-30);
+
+    if (ui->label_imageXY->rect().contains(localPosXY)){
+        if (countPointXY == 1){
+            firstPointXY.x = localPosXY.x();
+            firstPointXY.y = localPosXY.y();
+            countPointXY = 2;
+            emit LOG("First point got successfully chosen.");
+        }
+        else if (countPointXY == 2){
+            secPointXY.x = localPosXY.x();
+            secPointXY.y = localPosXY.y();
+            countPointXY = 3;
+            drawLineXY = true;
+            emit LOG("Second point got successfully chosen.");
+        }
+        else if (countPointXY == 3){
+            firstPointXY.x = localPosXY.x();
+            firstPointXY.y = localPosXY.y();
+            countPointXY = 2;
+            drawLineXY = true;
+            emit LOG("First point got successfully updated");
+        }
+        updateView();
+    }
+    if (ui->label_imageXZ->rect().contains(localPosXZ)){
+        if (countPointXY == 3 || countPointXY == 2){
+            if (countPointXZ == 1){
+                firstPointXZ.x = firstPointXY.x;
+                firstPointXZ.z = localPosXZ.y();
+                countPointXZ = 2;
+                emit LOG("First point got successfully chosen.");
+            }
+            else if (countPointXZ == 2){
+                secPointXZ.x = secPointXY.x;
+                secPointXZ.z = localPosXZ.y();
+                countPointXZ = 3;
+                drawLineXZ = true;
+                emit LOG("Second point got successfully chosen.");
+            }
+            else if (countPointXZ == 3){
+                firstPointXZ.x = firstPointXY.x;
+                firstPointXZ.z = localPosXZ.y();
+                countPointXZ = 2;
+                drawLineXZ = true;
+                emit LOG("First point got successfully updated");
+            }
+            updateView();
+        }
+    }
+}
 void ImageLoader::updateView(){
     // get the data from the database
     const image3D tmp_im3D = m_pData->getImageData3D();
     // creat objects of type QImage to visualize it in GUI
     QImage imageXY(tmp_im3D.width,tmp_im3D.height, QImage::Format_RGB32);
     QImage imageXZ(tmp_im3D.width,tmp_im3D.slices, QImage::Format_RGB32);
-
     // read values from the GUI
     int startValueXY = ui->slider_StartValueXY->value();
     int windowWidthXY = ui->slider_WindowWidthXY->value();
@@ -156,7 +187,6 @@ void ImageLoader::updateView(){
     int windowWidthXZ = ui->slider_WindowWidthXZ->value();
     int layerNrXZ = ui->slider_LayerNrXZ->value();
     int tresholdXZ = ui->Slider_ThresholdXZ->value();
-
 
     if (true){
         // ------- Top-View -------------------------------------------------------------
@@ -171,7 +201,7 @@ void ImageLoader::updateView(){
         }
     }
     if(true){
-        //-------------- front view -----------------------------------------------------
+        //-------------- XZ view -----------------------------------------------------
         for (int i = 0; i < tmp_im3D.width; i++){
             for (int z = 0; z < tmp_im3D.slices; z++){
                 int index = layerNrXZ * tmp_im3D.width + i + tmp_im3D.width*tmp_im3D.height*z ;
@@ -183,17 +213,17 @@ void ImageLoader::updateView(){
         }
     }
     // ------- draw lines & squares showing the current layers -------------------------------
-    // draw a yellow line which shows the front layer view
+    // draw a blue line which shows the XZ layer view
     for (int i = 0; i < 512; i++) {
-        imageXY.setPixel(i,layerNrXZ,qRgb(255, 255, 0));
+        imageXY.setPixel(i,layerNrXZ,qRgb(0, 0, 255));
     }
-    // draw a green square around the top view
+    // draw a blue square around the top view
     for (int i = 0; i < 512; i++) {
         for (int j = 0; j < 3; j++){
-            imageXZ.setPixel(i,j,qRgb(255, 255, 0));
-            imageXZ.setPixel(j,i,qRgb(255, 255, 0));
-            imageXZ.setPixel(i,511-j,qRgb(255, 255, 0));
-            imageXZ.setPixel(511-j,i,qRgb(255, 255, 0));
+            imageXZ.setPixel(i,j,qRgb(0, 0, 255));
+            imageXZ.setPixel(j,i,qRgb(0, 0, 255));
+            imageXZ.setPixel(i,511-j,qRgb(0, 0, 255));
+            imageXZ.setPixel(511-j,i,qRgb(0, 0, 255));
         }
     }
     // draw a green line which shows the top layer view
@@ -209,93 +239,152 @@ void ImageLoader::updateView(){
             imageXY.setPixel(511-j,i,qRgb(0, 255, 0));
         }
     }
-
     // ------- draw selected points and the connecting line ------------------------
-    if (drawLine){ // draw the line connecting first point to the second point in top view
+    if (drawLineXY){ // draw the line connecting first point to the second point in top view
+        /*float tanLine = (firstPointXY.y - secPointXY.y)/(firstPointXY.x - secPointXY.x);
         for (float i = 0; i < 512; i++) {
-            float tanLine = (firstPoint.y - secPoint.y)/(firstPoint.x - secPoint.x);
-            float dj = (i-secPoint.x)* tanLine + secPoint.y;
+            float dj = (i-secPointXY.x)* tanLine + secPointXY.y;
             int j = (int)dj;
-            imageXY.setPixel(i,j,qRgb(255, 0, 0));
+            imageXY.setPixel(i,j,qRgb(255, 255, 0));
         }
+        tanLine = (firstPointXY.x - secPointXY.x)/(firstPointXY.y - secPointXY.y);
         for (float j = 0; j < 512; j++) {
-            float tanLine = (firstPoint.x - secPoint.x)/(firstPoint.y - secPoint.y);
-            float di = (j-secPoint.y)* tanLine + secPoint.x;
+            float di = (j-secPointXY.y)* tanLine + secPointXY.x;
             int i = (int)di;
-            imageXY.setPixel(i,j,qRgb(255, 0, 0));
+            imageXY.setPixel(i,j,qRgb(255, 255, 0));
+        }
+        */
+        float tanLine = (firstPointXY.y - secPointXY.y)/(firstPointXY.x - secPointXY.x);
+        for (float i = 0; i < 1000; i++) {
+            float dx = firstPointXY.x + (secPointXY.x - firstPointXY.x)/1000.0*i; // interpolate betwenn the two points
+            float dy = (dx-firstPointXY.x)* tanLine + firstPointXY.y;
+            int x = (int)dx;
+            int y = (int)dy;
+            imageXY.setPixel(x,y,qRgb(255, 255, 0));
         }
         // draw a circle around the second point
         for (int i = 0; i<=512 ; i++){
                 for (int j = 0; j<=512 ; j++){
-                    if(pow(i- secPoint.x,2) + pow(j-secPoint.y,2) < 36 ){
+                    if(pow(i- secPointXY.x,2) + pow(j-secPointXY.y,2) < 36 ){
                         imageXY.setPixel(i,j, qRgb(255, 0, 0));
                     }
                 }
          }
-        // draw a line which visualize the second point selected in the top view in front view
+        // draw a line which visualize the second point selected in the top view in XZ view
         for (int z = 0; z < 512 ; z++){
-            imageXZ.setPixel(secPoint.x,z, qRgb(255, 0, 0));
+            imageXZ.setPixel(secPointXY.x,z, qRgb(255, 0, 0));
          }
     }
-    if (countPoint==2 || countPoint==3) // first point got selected/updated
+    if (countPointXY==2 || countPointXY==3) // first point got selected/updated
     {
         // draw a circle around the first point
         for (int i = 0; i < 512 ; i++){
                 for (int j = 0; j < 512 ; j++){
-                    if(pow(i- firstPoint.x,2) + pow(j-firstPoint.y,2) < 36 ){
+                    if(pow(i- firstPointXY.x,2) + pow(j-firstPointXY.y,2) < 36 ){
                         imageXY.setPixel(i,j, qRgb(255, 0, 0));
                     }
                 }
          }
-        // draw a line which visualize the first point selected in the top view in front view
+        // draw a line which visualize the first point selected in the top view in XZ view
         for (int z = 0; z < 512 ; z++){
-            imageXZ.setPixel(firstPoint.x,z, qRgb(255, 0, 0));
+            imageXZ.setPixel(firstPointXY.x,z, qRgb(255, 0, 0));
          }
     }
 
-
-
-    if (drawLineFront){ // draw the line connecting first point to the second point in front view
-        for (float i = 0; i < 512; i++) {
-            float tanLine = (firstPointFront.z - secPointFront.z)/(firstPointFront.x - secPointFront.x);
-            float dj = (i-secPointFront.x)* tanLine + secPointFront.z;
+    if (drawLineXZ){ // draw the line connecting first point to the second point in XZ view
+        /*for (float i = 0; i < 512; i++) {
+            float tanLine = (firstPointXZ.z - secPointXZ.z)/(firstPointXZ.x - secPointXZ.x);
+            float dj = (i-secPointXZ.x)* tanLine + secPointXZ.z;
             int j = (int)dj;
-            imageXZ.setPixel(i,j,qRgb(255, 0, 0));
+            imageXZ.setPixel(i,j,qRgb(255, 0, 255));
         }
         for (float z = 0; z < 512; z++) {
-            float tanLine = (firstPointFront.x - secPointFront.x)/(firstPointFront.z - secPointFront.z);
-            float di = (z-secPointFront.z)* tanLine + secPointFront.x;
+            float tanLine = (firstPointXZ.x - secPointXZ.x)/(firstPointXZ.z - secPointXZ.z);
+            float di = (z-secPointXZ.z)* tanLine + secPointXZ.x;
             int i = (int)di;
-            imageXZ.setPixel(i,z,qRgb(255, 0, 0));
+            imageXZ.setPixel(i,z,qRgb(255, 0, 255));
+        }*/
+        float tanLine = (firstPointXZ.z - secPointXZ.z)/(firstPointXZ.x - secPointXZ.x);
+        for (float i = 0; i < 1000; i++) {
+            float dx = firstPointXZ.x + (secPointXZ.x - firstPointXZ.x)/1000.0*i; // interpolate betwenn the two points
+            float dy = (dx-firstPointXZ.x)* tanLine + firstPointXZ.z;
+            int x = (int)dx;
+            int y = (int)dy;
+            imageXZ.setPixel(x,y,qRgb(255, 255, 0));
         }
-        // draw a circle around the second point in front view
+        // draw a circle around the second point in XZ view
         for (int i = 0; i<=512 ; i++){
                 for (int z = 0; z<=512 ; z++){
-                    if(pow(i- secPointFront.x,2) + pow(z-secPointFront.z,2) < 36 ){
-                        imageXZ.setPixel(i,z, qRgb(255, 0, 0));
+                    if(pow(i- secPointXZ.x,2) + pow(z-secPointXZ.z,2) < 36 ){
+                        imageXZ.setPixel(i,z, qRgb(255, 0, 255));
                     }
                 }
          }
-        // draw a line which visualize the second point selected in the front view in top view
+        // draw a line which visualize the second point selected in the XZ view in top view
         for (int j = 0; j < 512 ; j++){
-            imageXY.setPixel(secPointFront.x,j, qRgb(255, 0, 0));
+            imageXY.setPixel(secPointXZ.x,j, qRgb(255, 0, 255));
          }
     }
-    if (countPointFront==2 || countPointFront==3) // first point got selected/updated
-    {
-        // draw a circle around the first point in front view
+    if (countPointXZ==2 || countPointXZ==3){ // first point got selected/updated
+        // draw a circle around the first point in XZ view
         for (int i = 0; i<=512 ; i++){
                 for (int z = 0; z<=512 ; z++){
-                    if(pow(i- firstPointFront.x,2) + pow(z-firstPointFront.z,2) < 36 ){
-                        imageXZ.setPixel(i,z, qRgb(255, 0, 0));
+                    if(pow(i- firstPointXZ.x,2) + pow(z-firstPointXZ.z,2) < 36 ){
+                        imageXZ.setPixel(i,z, qRgb(255, 0, 255));
                     }
                 }
          }
-        // draw a line which visualize the first point selected in the front view in top view
+        // draw a line which visualize the first point selected in the XZ view in top view
         for (int j = 0; j < 512 ; j++){
-            imageXY.setPixel(firstPointFront.x,j, qRgb(255, 0, 0));
+            imageXY.setPixel(firstPointXZ.x,j, qRgb(255, 0, 255));
          }
     }
+
+    if(drawDrillTrajectory){
+        // draw a circle around the pos point in both views
+        for (int i = 0; i<=512 ; i++){
+             for (int j = 0; j<=512 ; j++){
+                  if(pow(i- reco.pos.x,2)+ pow(j-reco.pos.y,2)< 36 ){
+                         imageXY.setPixel(i,j, qRgb(255, 255, 0));
+                  }
+             }
+         }
+        for (int i = 0; i<=512 ; i++){
+            for (int z = 0; z<=512 ; z++){
+                  if(pow(i- reco.pos.x,2) + pow(z-reco.pos.z,2)< 36 ){
+                        imageXZ.setPixel(i,z, qRgb(255, 255, 0));
+                  }
+             }
+         }
+        // draw the vector in the pos normal to the DrillTrajectory
+        double a = secPoint.x - firstPoint.x;
+        double b = secPoint.y - firstPoint.y;
+        double c = secPoint.z - firstPoint.z;
+        // normal to (a,b,c) and passing reco.pos
+        float tanLineXY = -a/b;
+        float tanLineXZ = -a/c;
+
+        for (int l=-256; l<=256; l++){
+            float dx = reco.pos.x + (-b)*l/(pow(pow(a,2)+pow(b,2),.5));
+            float dy = reco.pos.y + (a) *l/(pow(pow(a,2)+pow(b,2),.5));
+            int x = (int)dx;
+            int y = (int)dy;
+            if (x>=0 && x<512 && y>=0 && y<512){
+                imageXY.setPixel(x,y, qRgb(255, 255, 0));
+            }
+        }
+        for (int l=-256; l<=256; l++){
+            float dx = reco.pos.x + (-c)*l/(pow(pow(a,2)+pow(b,2),.5));
+            float dz = reco.pos.z + (a) *l/(pow(pow(a,2)+pow(c,2),.5));
+            int x = (int)dx;
+            int z = (int)dz;
+            if (x>=0 && x<512 && z>=0 && z<512){
+                imageXZ.setPixel(x,z, qRgb(255, 255, 0));
+            }
+        }
+
+    }
+
 
 
     // ------- update pics in the GUI -----------------------------------------
@@ -305,12 +394,12 @@ void ImageLoader::updateView(){
     ui->label_imageXZ->setPixmap(QPixmap::fromImage(imageXZ));
 
 
-    //
+    //-------------------------------------------------------------------------
     QImage image45(tmp_im3D.width,tmp_im3D.height, QImage::Format_RGB32);
     for (int i = 0; i <512; i++) {
         for (int j = 0; j < 512; j++){
             // Ebene: x+z = constant
-            double dx = ui->horizontalSlider->value() - j*pow(2,.5);
+            double dx = ui->Slider_SliceDepth->value() - j*pow(2,.5);
             int x = (int) dx;
             int y = i;
             double dz = j*pow(2,.5);
@@ -329,7 +418,6 @@ void ImageLoader::updateView(){
     }
     ui->label->setPixmap(QPixmap::fromImage(image45));
 }
-
 void ImageLoader::loadData(){
     // set path of the data
     // QString path = QFileDialog::getOpenFileName(this, "Open Image", "./","Raw Image Files (*.raw)");
@@ -343,8 +431,7 @@ void ImageLoader::loadData(){
         QMessageBox::critical(this, "ERROR", "Could not open/read the data");
     }
 }
-
-// fuctions for other features --------------------------------------------------------
+// fuctions for other features ----------------------------------------------
 void ImageLoader::update3DreflectionXY(){
     int treshold = ui->Slider_ThresholdXY_2->value();
     bool stat = m_pData->calculateDepthMap(treshold);
@@ -411,7 +498,6 @@ void ImageLoader::updateDepthMapXZ(){
     // Bild auf Benutzeroberfläche anzeigen
     ui->label_3DXZ->setPixmap(QPixmap::fromImage(image));
 }
-
 // GUI functions ------------------------------------------------------------
 void ImageLoader::updateWindowingStartXY(int value){
     ui->label_StartXY->setText("Start: " + QString::number(value));
@@ -451,6 +537,9 @@ void ImageLoader::updateTresholdXZ(int value){
 void ImageLoader::updateTresholdXZ_2(int value){
     ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(value));
 }
+void ImageLoader::updateSliceDepth(int value){
+    ui->label_SliceDepth->setText("Move layer along the trajectory % " + QString::number(value));
+}
 void ImageLoader::updateAllSlidernLabels(){
     // update text labels at the beginning
     int startValue = ui->slider_StartValueXY->value();
@@ -458,6 +547,8 @@ void ImageLoader::updateAllSlidernLabels(){
     int layerNr = ui->slider_LayerNrXY->value();
     int treshold = ui->Slider_ThresholdXY->value();
     int treshold_2 = ui->Slider_ThresholdXY_2->value();
+    int SliceDepth = ui->Slider_SliceDepth->value();
+
     ui->label_StartXY->setText("Start: " + QString::number(startValue));
     ui->label_WidthXY->setText("Width: " + QString::number(windowWidth));
     ui->label_LayerXY->setText("Layer: " + QString::number(layerNr));
@@ -474,4 +565,5 @@ void ImageLoader::updateAllSlidernLabels(){
     ui->label_LayerXZ->setText("Layer: " + QString::number(layerNrXZ));
     ui->label_ThresholdXZ->setText("Threshold: " + QString::number(tresholdXZ));
     ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(tresholdXZ_2));
+    ui->label_SliceDepth->setText("Move layer along the trajectory % " + QString::number(SliceDepth));
 }

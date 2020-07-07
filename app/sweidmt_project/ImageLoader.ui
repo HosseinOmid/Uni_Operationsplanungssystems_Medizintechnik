@@ -30,7 +30,13 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>16</width>
+      <height>16</height>
+     </size>
     </property>
     <widget class="QWidget" name="tabXYLayer">
      <attribute name="title">
@@ -40,7 +46,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>30</y>
+        <y>20</y>
         <width>512</width>
         <height>512</height>
        </rect>
@@ -274,7 +280,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabXZLayer">
      <attribute name="title">
@@ -539,12 +545,12 @@
      <attribute name="title">
       <string>reconstructed Lyer</string>
      </attribute>
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="label_SliceDepth">
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>580</y>
-        <width>121</width>
+        <y>550</y>
+        <width>171</width>
         <height>51</height>
        </rect>
       </property>
@@ -552,23 +558,23 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Move layer along the trajectory</string>
+       <string>Move layer along the trajectory % </string>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QSlider" name="horizontalSlider">
+     <widget class="QSlider" name="Slider_SliceDepth">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>600</y>
-        <width>331</width>
-        <height>18</height>
+        <x>40</x>
+        <y>570</y>
+        <width>301</width>
+        <height>30</height>
        </rect>
       </property>
       <property name="maximum">
-       <number>512</number>
+       <number>100</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -618,6 +624,32 @@
      </property>
      <property name="text">
       <string>Load Data</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>120</y>
+       <width>101</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Select Points</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_reconstruct">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>180</y>
+       <width>101</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reconstruct</string>
      </property>
     </widget>
    </widget>
