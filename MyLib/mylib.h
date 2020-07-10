@@ -1,15 +1,13 @@
 #ifndef MYLIB_H
 #define MYLIB_H
-
 #include "MyLib_global.h"
 #include <QFile>
 #include <cmath>
 //#include "Eigen/Core"
-
 // Autor: Hossein Omid Beiki
 
 /**
- * @brief The image3D struct
+ * @brief The image3D struct stores the 3D image data and all of its parameters
  */
 struct image3D{
     int width;
@@ -21,7 +19,7 @@ struct image3D{
 };
 
 /**
- * @brief The image2D struct
+ * @brief The image2D struct stores the 2D image data and its parameters
  */
 struct image2D{
 public:
@@ -29,7 +27,7 @@ public:
         pImage = new short[w*h];
         width = w;
         height = h;
-        //memset(pImage, 0, w*h*sizeof(short));
+        memset(pImage, 0, w*h*sizeof(short));
     }
     ~image2D(){
         delete pImage;
@@ -76,9 +74,9 @@ public:
 
     /**
      * @brief calc3Dreflection
-     * @param im2D
-     * @param im2DOut
-     * @return
+     * @param im2D input 2d image
+     * @param im2DOut output 2d image
+     * @return true if ok. false if not.
      */
     static bool calc3Dreflection(const image2D* im2D, image2D& im2DOut);
 };

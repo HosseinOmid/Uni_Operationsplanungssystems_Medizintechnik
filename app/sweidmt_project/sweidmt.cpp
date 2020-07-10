@@ -7,7 +7,6 @@ SWEIDMT::SWEIDMT(QWidget *parent) :
 {
     ui->setupUi(this);
 
-
     m_pWidget = new ImageLoader(this);
     ui->tabWidget->addTab(m_pWidget, "Load Image");
     m_pWidget->setData(&m_data);
@@ -18,17 +17,12 @@ SWEIDMT::SWEIDMT(QWidget *parent) :
     connect(m_pWidget, SIGNAL(LOG(QString)), this, SLOT(LOG(QString)));
 }
 
-//void methode1(){}
 
-
-SWEIDMT::~SWEIDMT()
-{
+SWEIDMT::~SWEIDMT(){
     delete ui;
     delete m_pWidget;
 }
 
-
-void SWEIDMT::LOG(QString str)
-{
+void SWEIDMT::LOG(QString str){
     ui->textEdit->append(str);
 }

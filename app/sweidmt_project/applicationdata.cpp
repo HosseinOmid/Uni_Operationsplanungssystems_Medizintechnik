@@ -2,39 +2,30 @@
 #include <QFile>
 #include <QFileDialog>
 #include <qmessagebox.h>
-
-ApplicationData::ApplicationData(){
-    im3D.pImage = new short[512*512*512];
+// Autor: Hossein Omid Beiki
+ApplicationData::ApplicationData(){    
     im3D.width = 512;
     im3D.height = 512;
-    im3D.slices = 512;
+    im3D.slices = 256;
+    im3D.pImage = new short[im3D.width*im3D.height*im3D.slices];
     im3D.pixelSpacingXY= 1.2695;
     im3D.pixelSpacingZ = 2.0000;
-
-    m_depthMap = new image2D(512, 512);
-    m_depthMapFront = new image2D(512, 512);
-
-    //m_pTiefenkarte = new short[512*512];
-    //m_pTiefenkarteFront = new short[512*512];
+    m_depthMapXY = new image2D(im3D.width, im3D.height);
+    m_depthMapXZ = new image2D(im3D.width, im3D.slices);
 }
 ApplicationData::~ApplicationData(){    
-    //delete[] m_pImageData;
-    //delete[] m_pTiefenkarte;
-    //delete[] m_pTiefenkarteFront;
     //delete[] m_depthMap;
     //delete[] m_depthMapFront;
 }
-
-const image2D* ApplicationData::getDepthMap(){
-    return m_depthMap;
+const image2D* ApplicationData::getDepthMapXY(){
+    return m_depthMapXY;
 }
-const image2D* ApplicationData::getDepthMapFront(){
-    return m_depthMapFront;
+const image2D* ApplicationData::getDepthMapXZ(){
+    return m_depthMapXZ;
 }
 const image3D ApplicationData::getImageData3D(){
     return im3D;
 }
-
 bool ApplicationData::uploadImage(QString path){
     //Die Funktionen uploadImage() und calculateDepthMap() sollen bei einem Fehlerfall einen false-Wert zurückliefern, ansonsten true.
     bool error_stat = false;
@@ -55,8 +46,8 @@ bool ApplicationData::uploadImage(QString path){
     return error_stat;
 
 }
-bool ApplicationData::calculateDepthMap(int threshold){
-    //return: 0 if ok.-1 if threshold is out of range or error.
+bool ApplicationData::calculateDepthMapXY(int threshold){
+    //return: true if ok.false if threshold is out of range or error.
     bool error_stat = false;
     if (threshold <= maxHUVal && threshold >= minHUVal){
         error_stat = true;
@@ -74,14 +65,13 @@ bool ApplicationData::calculateDepthMap(int threshold){
                         break;
                     }
                 }
-                m_depthMap->pImage[j * m_depthMapFront->height + i] = iDepth;
+                m_depthMapXY->pImage[j * m_depthMapXY->width + i] = iDepth;
             }
         }
     }
     return error_stat;
 }
-bool ApplicationData::calculateDepthMapFront(int threshold)
-{
+bool ApplicationData::calculateDepthMapXZ(int threshold){
     //return: 0 if ok.-1 if threshold is out of range.
     bool error_stat = false;
     if (threshold <= maxHUVal && threshold >= minHUVal){
@@ -100,7 +90,7 @@ bool ApplicationData::calculateDepthMapFront(int threshold)
                         break;
                    }
                 }
-                m_depthMapFront->pImage[iLayer * m_depthMapFront->height + i] = iDepth;
+                m_depthMapXZ->pImage[iLayer * m_depthMapXZ->width + i] = iDepth;
             }
         }
     }

@@ -19,19 +19,16 @@ SOURCES += \
     applicationdata.cpp \
     imageloader.cpp \
     main.cpp \
-    sweidmt.cpp \
-    view3d.cpp
+    sweidmt.cpp
 
 HEADERS += \
     applicationdata.h \
     imageloader.h \
-    sweidmt.h \
-    view3d.h
+    sweidmt.h
 
 FORMS += \
     ImageLoader.ui \
-    sweidmt.ui \
-    view3d.ui
+    sweidmt.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

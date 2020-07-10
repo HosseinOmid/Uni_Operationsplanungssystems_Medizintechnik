@@ -7,16 +7,14 @@
 #include <cmath>
 #include <mylib.h>
 
-class ApplicationData
-{
+class ApplicationData{
 public:
     ApplicationData();
     ~ApplicationData();
     //const short* getImage();
-    const image2D* getDepthMap();
-    const image2D* getDepthMapFront();
+    const image2D* getDepthMapXY();
+    const image2D* getDepthMapXZ();
     const image3D getImageData3D();
-
 
     /**
      * @brief ApplicationData::uploadImage reads and stores the data
@@ -24,30 +22,14 @@ public:
      * @return true if ok. false if error
      */
     bool uploadImage(QString path);
-    /**
-     * @brief calculateDepthMap
-     * @param threshold
-     * @return true if ok. false if error
-     */
-    bool calculateDepthMap(int threshold);
-    /**
-     * @brief calculateDepthMapFront
-     * @param threshold
-     * @return true if ok. false if error
-     */
-    bool calculateDepthMapFront(int threshold);
-
+    bool calculateDepthMapXY(int threshold);
+    bool calculateDepthMapXZ(int threshold);
 private:
-    short* m_pTiefenkarte;
-    short* m_pTiefenkarteFront;
-    //short* m_pImageData;
     image3D im3D;
-    image2D* m_depthMap;
-    image2D* m_depthMapFront;
+    image2D* m_depthMapXY;
+    image2D* m_depthMapXZ;
 
     const int maxHUVal = 3072;
     const int minHUVal = -1024;
-
 };
-
 #endif // APPLICATIONDATA_H

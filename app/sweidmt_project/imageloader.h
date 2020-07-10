@@ -40,13 +40,11 @@ private:
     point secPointXY;
     point firstPointXZ;
     point secPointXZ;
-    int countPointXY;
-    int countPointXZ;
-    bool drawLineXY;
-    bool drawLineXZ;
+    int countPoint;
+    bool drawLine;
     bool drawDrillTrajectory;
 
-    //image2D reco_im2D;
+    image2D* reco_im2D;
 
     //short* m_pImageData;
     //short* m_pImageData3D;
@@ -71,7 +69,6 @@ private slots:
     void updateSliceDepth(int value);
 
     void updateView();
-    //void updateTiefenkarteView();
     void update3DreflectionXY();
     void update3DreflectionXZ();
     void updateDepthMapXY();
