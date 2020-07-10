@@ -652,7 +652,7 @@
       <string>Slice</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="label_p1">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -664,6 +664,9 @@
      <property name="text">
       <string>Point 1: (00,00,00)</string>
      </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
@@ -671,7 +674,7 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="label_4">
+    <widget class="QLabel" name="label_p2">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -690,7 +693,7 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="label_5">
+    <widget class="QLabel" name="label_xdir">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -709,7 +712,7 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="label_ydir">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -728,7 +731,7 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="label_7">
+    <widget class="QLabel" name="label_pos">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -738,7 +741,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Slice Pos: (00,00,00)</string>
+      <string>Slice Pos: (000,000,000)</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

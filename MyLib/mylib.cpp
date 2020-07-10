@@ -71,10 +71,10 @@ bool MyLib::calc3Dreflection(const image2D* im2D, image2D& im2DOut){
         int sy = 2;
         for (int i = 1; i < im2D->width - 1 ; i++){
             for (int j = 1; j < im2D->height - 1 ; j++){
-                int leftXNeighbor  = im2D->pImage[j * im2D->height + i-1];
-                int rightXNeighbor = im2D->pImage[j * im2D->height + i+1];
-                int leftYNeighbor  = im2D->pImage[(j-1) * im2D->height + i];
-                int rightYNeighbor = im2D->pImage[(j+1) * im2D->height + i];
+                int leftXNeighbor  = im2D->pImage[j * im2D->width + i-1];
+                int rightXNeighbor = im2D->pImage[j * im2D->width + i+1];
+                int leftYNeighbor  = im2D->pImage[(j-1) * im2D->width + i];
+                int rightYNeighbor = im2D->pImage[(j+1) * im2D->width + i];
                 int Tx = leftXNeighbor - rightXNeighbor;
                 int Ty = leftYNeighbor - rightYNeighbor ;
                 int iReflection = 255* (sx*sy) / std::pow(std::pow(sy*Tx,2) + std::pow(sx*Ty,2) + std::pow(sx*sy,2),0.5) ;

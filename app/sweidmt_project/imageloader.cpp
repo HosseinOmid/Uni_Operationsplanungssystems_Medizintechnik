@@ -75,14 +75,44 @@ void ImageLoader::reconstructSlice(){
     // xdir and ydir are orthogonal, e.a (xdir.ydir = 0)
     // and both xdir and ydir are placed on the plan and should satisfy the plane equation.
     // so we get xdir and ydir as following:
-    reco.xdir.x = 1;
-    reco.xdir.y = (-a)/b;
-    reco.xdir.z = 0;
 
-    reco.ydir.x = 1;
-    reco.ydir.y = b/a;
-    reco.ydir.z = (-a - pow(b,2)/a)/c;
+    // special cases:
+    if (a==0 && b==0){
+        reco.xdir.x = 1;
+        reco.xdir.y = 0;
+        reco.xdir.z = 0;
 
+        reco.ydir.x = 0;
+        reco.ydir.y = 1;
+        reco.ydir.z = 0;
+    }
+    else if(a==0 && c==0){
+        reco.xdir.x = 1;
+        reco.xdir.y = 0;
+        reco.xdir.z = 0;
+
+        reco.ydir.x = 0;
+        reco.ydir.y = 0;
+        reco.ydir.z = 1;
+    }
+    else if(b==0 && c==0){
+        reco.xdir.x = 0;
+        reco.xdir.y = 1;
+        reco.xdir.z = 0;
+
+        reco.ydir.x = 0;
+        reco.ydir.y = 0;
+        reco.ydir.z = 1;
+    }
+    else{
+        reco.xdir.x = b;
+        reco.xdir.y = -a;
+        reco.xdir.z = 0;
+
+        reco.ydir.x = c*a;
+        reco.ydir.y = c*b;
+        reco.ydir.z = (-a*a - b*b);
+    }
     //normalize xdir and ydir
     double xdirLength = pow(pow(reco.xdir.x,2) + pow(reco.xdir.y,2) + pow(reco.xdir.z,2), .5);
     double ydirLength = pow(pow(reco.ydir.x,2) + pow(reco.ydir.y,2) + pow(reco.ydir.z,2), .5);;
@@ -101,6 +131,7 @@ void ImageLoader::reconstructSlice(){
     int err_stat = MyLib::getSlice(tmp_im3D, reco, *reco_im2D);
     drawDrillTrajectory = true;
     updateView();
+    updateAllLabels();
 }
 
 void ImageLoader::mousePressEvent(QMouseEvent *event){
@@ -396,7 +427,7 @@ void ImageLoader::update3DreflectionXZ(){
     image2D im2D = image2D(depthMap->width,depthMap->height);
     stat = MyLib::calc3Dreflection(depthMap, im2D);
     // Erzeugen ein Objekt vom Typ QImage
-    QImage image(im2D.width,im2D.height, QImage::Format_RGB32);
+    QImage image(depthMap->width,depthMap->height, QImage::Format_RGB32);
     for (int i = 1; i < im2D.width-1 ; i++){
         for (int j = 1; j < im2D.height-1 ; j++){
             int iReflection = im2D.pImage[i + j*im2D.width];
@@ -414,8 +445,8 @@ void ImageLoader::updateDepthMapXY(){
     QImage image(depthMap->width,depthMap->height, QImage::Format_RGB32);
     for (int i = 1; i < depthMap->width-1; i++){
         for (int j = 1; j < depthMap->height-1; j++){
-            int iReflection = depthMap->pImage[i + depthMap->width*j];
-            image.setPixel(i,j,qRgb(iReflection, iReflection, iReflection));
+            int iDepth = depthMap->pImage[i + depthMap->width*j];
+            image.setPixel(i,j,qRgb(iDepth, iDepth, iDepth));
         }
     }
     // Bild auf Benutzeroberfläche anzeigen
@@ -431,14 +462,25 @@ void ImageLoader::updateDepthMapXZ(){
     QImage image(depthMap->width,depthMap->height, QImage::Format_RGB32);
     for (int i = 1; i < depthMap->width-1; i++){
         for (int j = 1; j < depthMap->height-1; j++){
-            int iReflection = depthMap->pImage[i + depthMap->width*j];
-            image.setPixel(i,j,qRgb(iReflection, iReflection, iReflection));
+            int iDepth = depthMap->pImage[i + depthMap->width*j];
+            image.setPixel(i,j,qRgb(iDepth, iDepth, iDepth));
         }
     }
     // Bild auf Benutzeroberfläche anzeigen
     ui->label_3DXZ->setPixmap(QPixmap::fromImage(image));
 }
 // GUI functions ------------------------------------------------------------
+
+void ImageLoader::updateAllLabels(){
+    ui->label_p1->setText("Point 1: (" + QString::number(firstPoint.x) + "," + QString::number(firstPoint.y) + "," + QString::number(firstPoint.z) + ")");
+    ui->label_p2->setText("Point 2: (" + QString::number(secPoint.x) + "," + QString::number(secPoint.y) + "," + QString::number(secPoint.z) + ")");
+    ui->label_pos->setText("Slice Pos: (" + QString::number(round(reco.pos.x)) + "," + QString::number(round(reco.pos.y)) + "," + QString::number(round(reco.pos.z)) + ")");
+    ui->label_xdir->setText("xdir: (" + QString::number(round(reco.xdir.x*10)/10) + "," + QString::number(round(reco.xdir.y*10)/10) + "," + QString::number(round(reco.xdir.z*10)/10) + ")");
+    ui->label_ydir->setText("ydir: (" + QString::number(round(reco.ydir.x*10)/10) + "," + QString::number(round(reco.ydir.y*10)/10) + "," + QString::number(round(reco.ydir.z*10)/10) + ")");
+
+
+}
+
 void ImageLoader::updateWindowingStartXY(int value){
     ui->label_StartXY->setText("Start: " + QString::number(value));
     updateView();

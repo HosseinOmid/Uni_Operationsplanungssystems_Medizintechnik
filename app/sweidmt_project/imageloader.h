@@ -66,6 +66,8 @@ private slots:
     void updateTresholdXZ(int value);
     void updateTresholdXZ_2(int value);
 
+    void updateAllLabels();
+
     void updateSliceDepth(int value);
 
     void updateView();
