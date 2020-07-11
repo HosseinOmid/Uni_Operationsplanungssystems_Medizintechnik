@@ -36,24 +36,29 @@ private:
     vector planeNormalVector;
     point firstPoint;
     point secPoint;
-    point firstPointXY;
-    point secPointXY;
-    point firstPointXZ;
-    point secPointXZ;
+    point sliceFrameSize;
     int countPoint;
-    bool drawLine;
-    bool drawDrillTrajectory;
+    bool bothPointsAreSelected;
+    bool drillTrajectoryIsDefined;
     double drillDiameter;
     double scale;
     image2D* reco_im2D;
 
-    //short* m_pImageData;
-    //short* m_pImageData3D;
-    //short* tiefenkarte;
-    //short* m_pTiefenkarteFront;
-
 private slots:
     void loadData();
+
+    void updateView();
+
+    void reconstructSlice();
+    double calculateDrillLength();
+    void resetPoints();
+
+    void mousePressEvent(QMouseEvent *event);
+    void update3DreflectionXY();
+    void update3DreflectionXZ();
+    void updateDepthMapXY();
+    void updateDepthMapXZ();
+
     void updateWindowingStartXY(int value);
     void updateWindowingWidthXY(int value);
     void updateLayerNrXY(int value);
@@ -64,20 +69,12 @@ private slots:
     void updateWindowingWidthXZ(int value);
     void updateLayerNrXZ(int value);
     void updateTresholdXZ_2(int value);
-    void resetPoints();
+
     void updateScale(int value);
-    void updateAllLabels();
-
+    void updateAllLabelsDescribingSlice();
+    void updateWindowingStartSlice(int value);
+    void updateWindowingWidthSlice(int value);
     void updateSliceDepth(int value);
-
-    void updateView();
-    void update3DreflectionXY();
-    void update3DreflectionXZ();
-    void updateDepthMapXY();
-    void updateDepthMapXZ();
-    void reconstructSlice();
-    double calculateDrillLength();
-    void mousePressEvent(QMouseEvent *event);
 
 signals:
     void LOG(QString str);

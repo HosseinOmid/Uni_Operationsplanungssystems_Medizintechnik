@@ -8,12 +8,14 @@
 #include <cmath>
 #include <QMouseEvent>
 
-// constructor ----------------------------------------------------------------------
+// constructor ------------------------------------------------------------------------------
 ImageLoader::ImageLoader(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow){
-    reco_im2D =  new image2D(512,512);
-    // connect events of GUI with funktions
+    sliceFrameSize.x = 512;
+    sliceFrameSize.y = 512;
+    reco_im2D =  new image2D(sliceFrameSize.x,sliceFrameSize.y);
+    // connect events of GUI with functions
     ui->setupUi(this);
 
     // load Data
@@ -22,17 +24,19 @@ ImageLoader::ImageLoader(QWidget *parent)
     // reconstruct a selected slice
     connect(ui->pushButton_reconstruct, SIGNAL(clicked()), this, SLOT(reconstructSlice()));
     connect(ui->Slider_Scale, SIGNAL(valueChanged(int)), this, SLOT(updateScale(int)));
-
-    // GUI
     connect(ui->pushButton_resetPoints, SIGNAL(clicked()), this, SLOT(resetPoints()));
+
+    // GUI slider and labels
     connect(ui->slider_StartValueXY, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStartXY(int)));
     connect(ui->slider_WindowWidthXY, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidthXY(int)));
     connect(ui->slider_LayerNrXY, SIGNAL(valueChanged(int)), this, SLOT(updateLayerNrXY(int)));
     connect(ui->slider_StartValueXZ, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStartXZ(int)));
     connect(ui->slider_WindowWidthXZ, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidthXZ(int)));
     connect(ui->slider_LayerNrXZ, SIGNAL(valueChanged(int)), this, SLOT(updateLayerNrXZ(int)));
-    connect(ui->Slider_ThresholdXZ_2, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXZ_2(int)));
-    connect(ui->Slider_ThresholdXY_2, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXY_2(int)));
+    connect(ui->Slider_ThresholdXZ, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXZ_2(int)));
+    connect(ui->Slider_ThresholdXY, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXY_2(int)));
+    connect(ui->slider_StartValueSlice, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStartSlice(int)));
+    connect(ui->slider_WindowWidthSlice, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidthSlice(int)));
     connect(ui->Slider_SliceDepth, SIGNAL(valueChanged(int)), this, SLOT(updateSliceDepth(int)));
 
     // other features
@@ -46,8 +50,8 @@ ImageLoader::ImageLoader(QWidget *parent)
 
     // initialize important variabels
     countPoint = 1;
-    drawLine = false;
-    drawDrillTrajectory = false;
+    bothPointsAreSelected = false;
+    drillTrajectoryIsDefined = false;
     scale = 1;
 }
 
@@ -57,8 +61,10 @@ ImageLoader::~ImageLoader(){
     // Speicher wieder freigeben
     // delete m_pData; //brauchen wir das? führt zu Fehler...
 }
-// creat a connection to application data ---------------------------------------------------
+
+// important functional functions -----------------------------------------------------------
 void ImageLoader::setData(ApplicationData *pData){
+    // creat a connection to application data
     this->m_pData = pData;
 }
 
@@ -80,17 +86,26 @@ void ImageLoader::reconstructSlice(){
 
     // equation of a plane: ax + by + cz = d
     // also we know that the point reco.pos is place on the plan, so:
-    double d = a*reco.pos.x + b*reco.pos.y + c*reco.pos.z;
-    // we want to define to orthogonal vectors which describe our plane
-    // there are infit such vectors, since there are infinit lines on a plane
-    // so we just define that xdir has no z component, and its component has the length of 1
-    // also we define that ydir has x comonent of length 1. Later we can normalize both vectors.
-    // consider xdir=(1, y1, 0) ; ydir=(1, y2, z2)
-    // xdir and ydir are orthogonal, e.a (xdir.ydir = 0)
-    // and both xdir and ydir are placed on the plan and should satisfy the plane equation.
-    // so we get xdir and ydir as following:
+    // double d = a*reco.pos.x + b*reco.pos.y + c*reco.pos.z;
+    // so the plane ist defined well.
+    // we want to define two orthogonal vectors which describe our plane.
+    // there are infit such vectors, since there are infinit lines on a plane.
+    // so we just define that xdir has no z component, and its x component has the length of 1
+    // also we define that ydir has x component of length 1. Later we can normalize both vectors.
+    // so consider xdir=(1, y1, 0) ; ydir=(1, y2, z2)
+    // we have 3 unknown variables and the following 3 equations:
+    // 1) xdir and normal vector (a,b,c) are orthogonal. so the scalar product should be zero.
+    //    xdir . (a,b,c) = 0 -> 1*a + y1*b + 0*c = 0 -> y1 = -a/b
+    // so we get xdir = (1, -a/b, 0)
+    // 2) xdir and ydir are orthogonal, e.a (xdir.ydir = 0)
+    //    it means 1*1 + (-a)/b*y2 + 0*z2 = 0 -> y2 = b/a
+    // 3) ydir is orthogonal to normal vector (a,b,c):
+    //    ydir . (a,b,c) = 0 -> 1*a + b/a*b + z2*c = 0 -> z2 = (-a - b^2/a)/c
+    // so we get ydir = (1, b/a, (-a - b^2/a)/c)
+    // now we multiply xdir with the scalar a to avoid deviding by zero, in case a ist zero
+    // also we multiply ydir with the scalar a*c to avoid deviding by zero
 
-    // special cases:
+    // special cases are considered separately as following:
     if (a==0 && b==0){
         reco.xdir.x = 1;
         reco.xdir.y = 0;
@@ -118,14 +133,14 @@ void ImageLoader::reconstructSlice(){
         reco.ydir.y = 0;
         reco.ydir.z = 1;
     }
-    else{
+    else{ // see above comments
         reco.xdir.x = b;
         reco.xdir.y = -a;
         reco.xdir.z = 0;
 
-        reco.ydir.x = c*a;
-        reco.ydir.y = c*b;
-        reco.ydir.z = (-a*a - b*b);
+        reco.ydir.x = -c*a;
+        reco.ydir.y = -c*b;
+        reco.ydir.z = -(-a*a - b*b);
     }
     //normalize xdir and ydir
     double xdirLength = pow(pow(reco.xdir.x,2) + pow(reco.xdir.y,2) + pow(reco.xdir.z,2), .5);
@@ -146,9 +161,9 @@ void ImageLoader::reconstructSlice(){
     // error_stat: 0 if ok. -1 if input image is incorrect. -2 if output im2D is incorrect.
     if (err_stat==0){
         emit LOG("Slice got reconstructed successfully.");
-        drawDrillTrajectory = true;
+        drillTrajectoryIsDefined = true;
         updateView();
-        updateAllLabels();
+        updateAllLabelsDescribingSlice();
     }
     else{
         emit LOG("Error in reconstructing the selected slice. Please make sure the loaded image size is correct.");
@@ -156,7 +171,7 @@ void ImageLoader::reconstructSlice(){
 }
 
 void ImageLoader::mousePressEvent(QMouseEvent *event){
-    drawDrillTrajectory = false;
+    drillTrajectoryIsDefined = false;
     QPoint globalPos;
     globalPos = event->pos();
     QPoint localPosXY1;
@@ -184,13 +199,13 @@ void ImageLoader::mousePressEvent(QMouseEvent *event){
             secPoint.y = localPosXY.y();
             secPoint.z = ui->slider_LayerNrXY->value();
             countPoint = 1;
-            drawLine = true;
+            bothPointsAreSelected = true;
             emit LOG("Second point got successfully chosen.");
         }
         updateView();
     }
     if (ui->label_imageXZ->rect().contains(localPosXZ)){
-        if (drawLine){
+        if (bothPointsAreSelected){
             double dist1 = abs(firstPoint.x - localPosXZ.x());
             double dist2 = abs(secPoint.x - localPosXZ.x());
             if (dist1<dist2){
@@ -229,6 +244,10 @@ void ImageLoader::updateView(){
             int HU_value = tmp_im3D.pImage[index];
             int iGrauwert;
             int error_stat = MyLib::windowing(HU_value, startValueXY, windowWidthXY, iGrauwert);
+            if (error_stat==-1) // 0 if ok. -1 if HU_value is out of range. -2 if windowing parameters are out of range)
+                emit LOG("Erro in Windowing! HU-value is out of range!");
+            else if (error_stat==-2)
+                emit LOG("Erro in Windowing! Windowing parameters are out of range!");
             imageXY.setPixel(i,j,qRgb(iGrauwert, iGrauwert, iGrauwert));
         }
     }
@@ -256,6 +275,10 @@ void ImageLoader::updateView(){
             int HU_value = tmp_im3D.pImage[index];
             int iGrauwert;
             int error_stat = MyLib::windowing(HU_value, startValueXZ, windowWidthXZ, iGrauwert);
+            if (error_stat==-1) // 0 if ok. -1 if HU_value is out of range. -2 if windowing parameters are out of range)
+                emit LOG("Erro in Windowing! HU-value is out of range!");
+            else if (error_stat==-2)
+                emit LOG("Erro in Windowing! Windowing parameters are out of range!");
             imageXZ.setPixel(i,z,qRgb(iGrauwert, iGrauwert, iGrauwert));
         }
     }
@@ -278,7 +301,7 @@ void ImageLoader::updateView(){
     }
 
     // ------- draw selected points and the connecting line ------------------------
-    if (drawLine){ // draw the line connecting first point to the second point in top view
+    if (bothPointsAreSelected){ // draw the line connecting first point to the second point in top view
         float tanLine = (firstPoint.y - secPoint.y)/(firstPoint.x - secPoint.x);
         for (float i = 0; i < 1000; i++) {
             float dx = firstPoint.x + (secPoint.x - firstPoint.x)/1000.0*i; // interpolate between the two points
@@ -300,7 +323,7 @@ void ImageLoader::updateView(){
             imageXZ.setPixel(secPoint.x,z, qRgb(255, 0, 0));
          }
     }
-    if (countPoint==2 || drawLine){ // first point got selected/updated
+    if (countPoint==2 || bothPointsAreSelected){ // first point got selected/updated
         // draw a circle around the first point
         for (int i = 0; i < tmp_im3D.width ; i++){
                 for (int j = 0; j < tmp_im3D.height ; j++){
@@ -315,7 +338,7 @@ void ImageLoader::updateView(){
          }
     }
 
-    if (drawLine){ // draw the line connecting first point to the second point in XZ view
+    if (bothPointsAreSelected){ // draw the line connecting first point to the second point in XZ view
         float tanLine = (firstPoint.z - secPoint.z)/(firstPoint.x - secPoint.x);
         for (float i = 0; i < 1000; i++) {
             float dx = firstPoint.x + (secPoint.x - firstPoint.x)/1000.0*i; // interpolate betwenn the two points
@@ -333,7 +356,7 @@ void ImageLoader::updateView(){
                 }
          }
     }
-    if (countPoint==2 || drawLine){ // first point got selected/updated
+    if (countPoint==2 || bothPointsAreSelected){ // first point got selected/updated
         // draw a circle around the first point in XZ view
         for (int i = 0; i< tmp_im3D.width ; i++){
                 for (int z = 0; z< tmp_im3D.slices ; z++){
@@ -344,7 +367,7 @@ void ImageLoader::updateView(){
          }
     }
 
-    if(drawDrillTrajectory){
+    if(drillTrajectoryIsDefined){
         // draw a circle around the pos point in both views
         for (int i = 0; i< tmp_im3D.width ; i++){
              for (int j = 0; j< tmp_im3D.height ; j++){
@@ -370,7 +393,7 @@ void ImageLoader::updateView(){
             float dy = reco.pos.y + (a) *l/(pow(pow(a,2)+pow(b,2),.5));
             int x = (int)dx;
             int y = (int)dy;
-            if (x>=0 && x<512 && y>=0 && y<512){
+            if (x>=0 && x<sliceFrameSize.x && y>=0 && y<sliceFrameSize.y){
                 imageXY.setPixel(x,y, qRgb(255, 255, 0));
             }
         }
@@ -379,26 +402,31 @@ void ImageLoader::updateView(){
             float dz = reco.pos.z + (a) *l/(pow(pow(a,2)+pow(c,2),.5));
             int x = (int)dx;
             int z = (int)dz;
-            if (x>=0 && x<512 && z>=0 && z<512){
+            if (x>=0 && x<sliceFrameSize.x && z>=0 && z<sliceFrameSize.y){
                 imageXZ.setPixel(x,z, qRgb(255, 255, 0));
             }
         }
     }
-
     //------------------ Slice View --------------------------------------------
     QImage imageReco(reco_im2D->width,reco_im2D->height, QImage::Format_RGB32);
+    int startSlice = ui->slider_StartValueSlice->value();
+    int windowWidthSlice = ui->slider_WindowWidthSlice->value();
     for (int i = 0; i < reco_im2D->width; i++){
         for (int j = 0; j < reco_im2D->height; j++){
             int iHuVal = reco_im2D->pImage[i + reco_im2D->width*j];
             int iGrayVal;
-            int error_stat = MyLib::windowing(iHuVal, startValueXY, windowWidthXY, iGrayVal);
+            int error_stat = MyLib::windowing(iHuVal, startSlice, windowWidthSlice, iGrayVal);
+            if (error_stat==-1) // 0 if ok. -1 if HU_value is out of range. -2 if windowing parameters are out of range)
+                emit LOG("Erro in Windowing! HU-value is out of range!");
+            else if (error_stat==-2)
+                emit LOG("Erro in Windowing! Windowing parameters are out of range!");
             imageReco.setPixel(i,j, qRgb(iGrayVal, iGrayVal, iGrayVal));
         }
     }
     // Draw a red circle in size of drill diameter
     double i0 = reco_im2D->width/2;
     double j0 = reco_im2D->height/2;
-    for (float i = 0; i < reco_im2D->width; i++) {
+    for (float i = 0; i < reco_im2D->width; i = i+0.1) {
         // circle equation: (i-i0)^2 + (j-j0)^2 = r^2
         double scaledRadius = drillDiameter/2*scale;
         double deltaj2 = pow(scaledRadius,2) - pow(i-i0,2);
@@ -413,8 +441,6 @@ void ImageLoader::updateView(){
             imageReco.setPixel(i,j2, qRgb(255, 0, 0));
         }
     }
-
-
     // ------- update pics in the GUI -----------------------------------------
     // Bild auf Benutzeroberfläche anzeigen
     ui->label_imageXY->setPixmap(QPixmap::fromImage(imageXY));
@@ -423,6 +449,7 @@ void ImageLoader::updateView(){
     // Bild auf Benutzeroberfläche anzeigen
     ui->label->setPixmap(QPixmap::fromImage(imageReco));
 }
+
 void ImageLoader::loadData(){
     // set path of the data
     // QString path = QFileDialog::getOpenFileName(this, "Open Image", "./","Raw Image Files (*.raw)");
@@ -444,13 +471,15 @@ double ImageLoader::calculateDrillLength(){
     double drillLength = pow(pow((firstPoint.x-secPoint.x)*tmp_im3D.pixelSpacingXY,2) + pow((firstPoint.y-secPoint.y)*tmp_im3D.pixelSpacingXY,2)+ pow((firstPoint.z- secPoint.z)*tmp_im3D.pixelSpacingZ ,2),.5);
     return drillLength;
 }
-// GUI functions ------------------------------------------------------------
+
 void ImageLoader::resetPoints(){
     countPoint = 1;
-    drawLine = false;
-    drawDrillTrajectory = false;
+    bothPointsAreSelected = false;
+    drillTrajectoryIsDefined = false;
+    updateView();
 }
-void ImageLoader::updateAllLabels(){
+// GUI functions ----------------------------------------------------------------------------
+void ImageLoader::updateAllLabelsDescribingSlice(){
     ui->label_p1->setText("Point 1: (" + QString::number(firstPoint.x) + "," + QString::number(firstPoint.y) + "," + QString::number(firstPoint.z) + ")");
     ui->label_p2->setText("Point 2: (" + QString::number(secPoint.x) + "," + QString::number(secPoint.y) + "," + QString::number(secPoint.z) + ")");
     ui->label_pos->setText("Slice Pos: (" + QString::number(round(reco.pos.x)) + "," + QString::number(round(reco.pos.y)) + "," + QString::number(round(reco.pos.z)) + ")");
@@ -488,43 +517,67 @@ void ImageLoader::updateLayerNrXZ(int value){
 void ImageLoader::updateTresholdXZ_2(int value){
     ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(value));
 }
+void ImageLoader::updateWindowingStartSlice(int value){
+    ui->label_StartSlice->setText("Start :" + QString::number(value));
+    if (drillTrajectoryIsDefined == true){
+        reconstructSlice();
+    }
+}
+void ImageLoader::updateWindowingWidthSlice(int value){
+    ui->label_WidthSlice->setText("Width: " + QString::number(value));
+    if (drillTrajectoryIsDefined == true){
+        reconstructSlice();
+    }
+}
 void ImageLoader::updateSliceDepth(int value){
     ui->label_SliceDepth->setText("Move layer along the trajectory % " + QString::number(value));
-    if (drawDrillTrajectory == true){
+    if (drillTrajectoryIsDefined == true){
         reconstructSlice();
     }
 }
 void ImageLoader::updateScale(int value){
     scale = value;
     ui->label_ScaleFac->setText("Scale Factror: " + QString::number(scale));
-    reconstructSlice();
+    if (drillTrajectoryIsDefined == true){
+        reconstructSlice();
+    }
 }
 void ImageLoader::updateAllSlidernLabels(){
     // update text labels at the beginning
-    int startValue = ui->slider_StartValueXY->value();
-    int windowWidth = ui->slider_WindowWidthXY->value();
-    int layerNr = ui->slider_LayerNrXY->value();
-    int threshold_2 = ui->Slider_ThresholdXY_2->value();
-    int SliceDepth = ui->Slider_SliceDepth->value();
+    int startValueXY = ui->slider_StartValueXY->value();
+    int windowWidthXY = ui->slider_WindowWidthXY->value();
+    int layerNrXY = ui->slider_LayerNrXY->value();
+    int thresholdXY = ui->Slider_ThresholdXY->value();
 
-    ui->label_StartXY->setText("Start: " + QString::number(startValue));
-    ui->label_WidthXY->setText("Width: " + QString::number(windowWidth));
-    ui->label_LayerXY->setText("Layer: " + QString::number(layerNr));
-    ui->label_ThresholdXY_2->setText("Threshold: " + QString::number(threshold_2));
+    ui->label_StartXY->setText("Start: " + QString::number(startValueXY));
+    ui->label_WidthXY->setText("Width: " + QString::number(windowWidthXY));
+    ui->label_LayerXY->setText("Layer: " + QString::number(layerNrXY));
+    ui->label_ThresholdXY_2->setText("Threshold: " + QString::number(thresholdXY));
 
     int startValueXZ = ui->slider_StartValueXZ->value();
     int windowWidthXZ = ui->slider_WindowWidthXZ->value();
     int layerNrXZ = ui->slider_LayerNrXZ->value();
-    int thresholdXZ_2 = ui->Slider_ThresholdXZ_2->value();
+    int thresholdXZ = ui->Slider_ThresholdXZ->value();
+
     ui->label_StartXZ->setText("Start: " + QString::number(startValueXZ));
     ui->label_WidthXZ->setText("Width: " + QString::number(windowWidthXZ));
     ui->label_LayerXZ->setText("Layer: " + QString::number(layerNrXZ));
-    ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(thresholdXZ_2));
+    ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(thresholdXZ));
+
+    int SliceDepth = ui->Slider_SliceDepth->value();
+    int startSlice = ui->slider_StartValueSlice->value();
+    int windowWidthSlice = ui->slider_WindowWidthSlice->value();
+
+    ui->label_StartSlice->setText("Start: " + QString::number(startSlice));
+    ui->label_WidthSlice->setText("Width: " + QString::number(windowWidthSlice));
     ui->label_SliceDepth->setText("Move layer along the trajectory % " + QString::number(SliceDepth));
+
+    scale = ui->Slider_Scale->value();
+    ui->label_ScaleFac->setText("Scale Factror: " + QString::number(scale));
 }
-// fuctions for other features ----------------------------------------------
+// fuctions for other features --------------------------------------------------------------
 void ImageLoader::update3DreflectionXY(){
-    int treshold = ui->Slider_ThresholdXY_2->value();
+    int treshold = ui->Slider_ThresholdXY->value();
     bool stat = m_pData->calculateDepthMapXY(treshold);
     const image2D* tmpTiefenkarte = m_pData->getDepthMapXY();
     image2D im2D = image2D(tmpTiefenkarte->width,tmpTiefenkarte->height);
@@ -541,7 +594,7 @@ void ImageLoader::update3DreflectionXY(){
     ui->label_3DXY->setPixmap(QPixmap::fromImage(image));
 }
 void ImageLoader::update3DreflectionXZ(){
-    int thresholdXZ = ui->Slider_ThresholdXZ_2->value();
+    int thresholdXZ = ui->Slider_ThresholdXZ->value();
     bool stat = m_pData->calculateDepthMapXZ(thresholdXZ);
     const image2D* depthMap = m_pData->getDepthMapXZ();
     image2D im2D = image2D(depthMap->width,depthMap->height);
@@ -558,7 +611,7 @@ void ImageLoader::update3DreflectionXZ(){
     ui->label_3DXZ->setPixmap(QPixmap::fromImage(image));
 }
 void ImageLoader::updateDepthMapXY(){
-    int threshold = ui->Slider_ThresholdXY_2->value();
+    int threshold = ui->Slider_ThresholdXY->value();
     bool stat = m_pData->calculateDepthMapXY(threshold);
     const image2D* depthMap = m_pData->getDepthMapXY();
     // Erzeugen ein Objekt vom Typ QImage
@@ -573,7 +626,7 @@ void ImageLoader::updateDepthMapXY(){
     ui->label_3DXY->setPixmap(QPixmap::fromImage(image));
 }
 void ImageLoader::updateDepthMapXZ(){
-    int treshold = ui->Slider_ThresholdXZ_2->value();
+    int treshold = ui->Slider_ThresholdXZ->value();
     bool stat = m_pData->calculateDepthMapXZ(treshold);
     const image2D* depthMap = m_pData->getDepthMapXZ();
     image2D im2D = image2D(depthMap->width,depthMap->height);
