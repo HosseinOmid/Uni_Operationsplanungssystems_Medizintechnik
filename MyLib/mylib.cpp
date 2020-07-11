@@ -38,6 +38,9 @@ int MyLib::getSlice(const image3D& image, const Reconstruction& param, image2D& 
                 // normalize the param.xdir and param.ydir vectors
                 double xdirVecLength = pow(pow(param.xdir.x,2) + pow(param.xdir.y,2) + pow(param.xdir.z,2),0.5);
                 double ydirVecLength = pow(pow(param.ydir.x,2) + pow(param.ydir.y,2) + pow(param.ydir.z,2),0.5);
+
+                xdirVecLength *= param.scale;
+                ydirVecLength *= param.scale;
                 // calculate the coordinates x,y,z of pixel(i,j) of the slice in global coordinates system
                 // the slice is described by two orthogonal vectors xdir & ydir
                 double dx = param.pos.x + (i - im2D.width/2)*param.xdir.x/xdirVecLength + (j - im2D.height/2)*param.ydir.x/ydirVecLength;
@@ -48,7 +51,7 @@ int MyLib::getSlice(const image3D& image, const Reconstruction& param, image2D& 
                 int y = (int) (dy + .5);
                 int z = (int) ((dz/image.pixelSpacingZ*image.pixelSpacingXY )+.5);
                 // find the corresponding voxel index
-                int iIndex3DImgae = x+ y*image.height  + z*image.height*image.slices;
+                int iIndex3DImgae = x+ y*image.width  + z*image.width*image.height;
                 // check if the voxel exists / the voxel index is inside the image boundaries
                 int iHuVal = 0;
                 if (x>=0 && x<image.width && y>=0 && y<image.height && z>=0 && z<image.slices){

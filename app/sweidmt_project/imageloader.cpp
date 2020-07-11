@@ -8,52 +8,66 @@
 #include <cmath>
 #include <QMouseEvent>
 
-// constructor ---------------------------------------------
+// constructor ----------------------------------------------------------------------
 ImageLoader::ImageLoader(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow){
     reco_im2D =  new image2D(512,512);
-
-    countPoint = 1;
-    drawLine = false;
-    drawDrillTrajectory = false;
-
     // connect events of GUI with funktions
     ui->setupUi(this);
+
+    // load Data
     connect(ui->pushButton_load3D, SIGNAL(clicked()), this, SLOT(loadData()));
-    connect(ui->pushButton_DepthMapXZ, SIGNAL(clicked()), this, SLOT(updateDepthMapXY()));
-    connect(ui->pushButton_DepthMapXZ, SIGNAL(clicked()), this, SLOT(updateDepthMapXZ()));
-    connect(ui->pushButton_3DXY, SIGNAL(clicked()), this, SLOT(update3DreflectionXY()));
-    connect(ui->pushButton_3DXZ, SIGNAL(clicked()), this, SLOT(update3DreflectionXZ()));
+
+    // reconstruct a selected slice
+    connect(ui->pushButton_reconstruct, SIGNAL(clicked()), this, SLOT(reconstructSlice()));
+    connect(ui->Slider_Scale, SIGNAL(valueChanged(int)), this, SLOT(updateScale(int)));
+
+    // GUI
+    connect(ui->pushButton_resetPoints, SIGNAL(clicked()), this, SLOT(resetPoints()));
     connect(ui->slider_StartValueXY, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStartXY(int)));
     connect(ui->slider_WindowWidthXY, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidthXY(int)));
     connect(ui->slider_LayerNrXY, SIGNAL(valueChanged(int)), this, SLOT(updateLayerNrXY(int)));
-    connect(ui->Slider_ThresholdXY, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXY(int)));
     connect(ui->slider_StartValueXZ, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingStartXZ(int)));
     connect(ui->slider_WindowWidthXZ, SIGNAL(valueChanged(int)), this, SLOT(updateWindowingWidthXZ(int)));
     connect(ui->slider_LayerNrXZ, SIGNAL(valueChanged(int)), this, SLOT(updateLayerNrXZ(int)));
-    connect(ui->Slider_ThresholdXZ, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXZ(int)));
     connect(ui->Slider_ThresholdXZ_2, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXZ_2(int)));
     connect(ui->Slider_ThresholdXY_2, SIGNAL(valueChanged(int)), this, SLOT(updateTresholdXY_2(int)));
     connect(ui->Slider_SliceDepth, SIGNAL(valueChanged(int)), this, SLOT(updateSliceDepth(int)));
 
-    connect(ui->pushButton_reconstruct, SIGNAL(clicked()), this, SLOT(reconstructSlice()));
+    // other features
+    connect(ui->pushButton_DepthMapXZ, SIGNAL(clicked()), this, SLOT(updateDepthMapXY()));
+    connect(ui->pushButton_DepthMapXZ, SIGNAL(clicked()), this, SLOT(updateDepthMapXZ()));
+    connect(ui->pushButton_3DXY, SIGNAL(clicked()), this, SLOT(update3DreflectionXY()));
+    connect(ui->pushButton_3DXZ, SIGNAL(clicked()), this, SLOT(update3DreflectionXZ()));
 
+    // update all slider and labels
     ImageLoader::updateAllSlidernLabels();
+
+    // initialize important variabels
+    countPoint = 1;
+    drawLine = false;
+    drawDrillTrajectory = false;
+    scale = 1;
 }
 
-// destructor ------------------------------------------
+// destructor -------------------------------------------------------------------------------
 ImageLoader::~ImageLoader(){
     delete ui;
     // Speicher wieder freigeben
     // delete m_pData; //brauchen wir das? führt zu Fehler...
 }
-// creat a connection to application data --------------
+// creat a connection to application data ---------------------------------------------------
 void ImageLoader::setData(ApplicationData *pData){
     this->m_pData = pData;
 }
 
 void ImageLoader::reconstructSlice(){
+    QString drillDiamQstr =  ui->textEdit_DrillDiam->toPlainText();
+    drillDiameter = drillDiamQstr.toDouble();
+
+    reco.scale = scale;
+
     double a = secPoint.x - firstPoint.x;
     double b = secPoint.y - firstPoint.y;
     double c = secPoint.z - firstPoint.z;
@@ -129,9 +143,16 @@ void ImageLoader::reconstructSlice(){
 
     //image2D reco_im2D =  image2D(512,512);
     int err_stat = MyLib::getSlice(tmp_im3D, reco, *reco_im2D);
-    drawDrillTrajectory = true;
-    updateView();
-    updateAllLabels();
+    // error_stat: 0 if ok. -1 if input image is incorrect. -2 if output im2D is incorrect.
+    if (err_stat==0){
+        emit LOG("Slice got reconstructed successfully.");
+        drawDrillTrajectory = true;
+        updateView();
+        updateAllLabels();
+    }
+    else{
+        emit LOG("Error in reconstructing the selected slice. Please make sure the loaded image size is correct.");
+    }
 }
 
 void ImageLoader::mousePressEvent(QMouseEvent *event){
@@ -187,6 +208,7 @@ void ImageLoader::mousePressEvent(QMouseEvent *event){
         updateView();
     }
 }
+
 void ImageLoader::updateView(){
     // get the data from the database
     const image3D tmp_im3D = m_pData->getImageData3D();
@@ -197,11 +219,9 @@ void ImageLoader::updateView(){
     int startValueXY = ui->slider_StartValueXY->value();
     int windowWidthXY = ui->slider_WindowWidthXY->value();
     int layerNrXY = ui->slider_LayerNrXY->value();
-    int tresholdXY = ui->Slider_ThresholdXY->value();
     int startValueXZ = ui->slider_StartValueXZ->value();
     int windowWidthXZ = ui->slider_WindowWidthXZ->value();
     int layerNrXZ = ui->slider_LayerNrXZ->value();
-    int tresholdXZ = ui->Slider_ThresholdXZ->value();
     // -------------- XY View ----------------------------------------------------
     for (int i = 0; i < tmp_im3D.width; i++){
         for (int j = 0; j < tmp_im3D.height; j++){
@@ -326,15 +346,15 @@ void ImageLoader::updateView(){
 
     if(drawDrillTrajectory){
         // draw a circle around the pos point in both views
-        for (int i = 0; i<=512 ; i++){
-             for (int j = 0; j<=512 ; j++){
+        for (int i = 0; i< tmp_im3D.width ; i++){
+             for (int j = 0; j< tmp_im3D.height ; j++){
                   if(pow(i- reco.pos.x,2)+ pow(j-reco.pos.y,2)< 36 ){
                          imageXY.setPixel(i,j, qRgb(255, 255, 0));
                   }
              }
          }
-        for (int i = 0; i<=512 ; i++){
-            for (int z = 0; z<=512 ; z++){
+        for (int i = 0; i< tmp_im3D.width ; i++){
+            for (int z = 0; z< tmp_im3D.slices ; z++){
                   if(pow(i- reco.pos.x,2) + pow(z-reco.pos.z,2)< 36 ){
                         imageXZ.setPixel(i,z, qRgb(255, 255, 0));
                   }
@@ -345,9 +365,6 @@ void ImageLoader::updateView(){
         double b = secPoint.y - firstPoint.y;
         double c = secPoint.z - firstPoint.z;
         // normal to (a,b,c) and passing reco.pos
-        float tanLineXY = -a/b;
-        float tanLineXZ = -a/c;
-
         for (int l=-100; l<=100; l++){
             float dx = reco.pos.x + (-b)*l/(pow(pow(a,2)+pow(b,2),.5));
             float dy = reco.pos.y + (a) *l/(pow(pow(a,2)+pow(b,2),.5));
@@ -366,11 +383,9 @@ void ImageLoader::updateView(){
                 imageXZ.setPixel(x,z, qRgb(255, 255, 0));
             }
         }
-
     }
 
-
-    //------------------------------------------------------------------------
+    //------------------ Slice View --------------------------------------------
     QImage imageReco(reco_im2D->width,reco_im2D->height, QImage::Format_RGB32);
     for (int i = 0; i < reco_im2D->width; i++){
         for (int j = 0; j < reco_im2D->height; j++){
@@ -380,6 +395,25 @@ void ImageLoader::updateView(){
             imageReco.setPixel(i,j, qRgb(iGrayVal, iGrayVal, iGrayVal));
         }
     }
+    // Draw a red circle in size of drill diameter
+    double i0 = reco_im2D->width/2;
+    double j0 = reco_im2D->height/2;
+    for (float i = 0; i < reco_im2D->width; i++) {
+        // circle equation: (i-i0)^2 + (j-j0)^2 = r^2
+        double scaledRadius = drillDiameter/2*scale;
+        double deltaj2 = pow(scaledRadius,2) - pow(i-i0,2);
+        if (deltaj2<0)
+            continue;
+        double dj1 = pow(deltaj2,.5) + j0;
+        int j1 = (int)dj1;
+        double dj2 = -pow(deltaj2,.5) + j0;
+        int j2 = (int)dj2;
+        if (j1> 0 && j2>0 && j1<reco_im2D->height && j2<reco_im2D->height){
+            imageReco.setPixel(i,j1, qRgb(255, 0, 0));
+            imageReco.setPixel(i,j2, qRgb(255, 0, 0));
+        }
+    }
+
 
     // ------- update pics in the GUI -----------------------------------------
     // Bild auf Benutzeroberfläche anzeigen
@@ -397,10 +431,96 @@ void ImageLoader::loadData(){
     bool stat = m_pData->uploadImage(path);
     if (stat){ // if uploading image was successful
         updateView();
+        emit LOG("Data got successfully loaded.");
     }
     else{
         QMessageBox::critical(this, "ERROR", "Could not open/read the data");
     }
+}
+
+double ImageLoader::calculateDrillLength(){
+    // get the data from the database
+    const image3D tmp_im3D = m_pData->getImageData3D();
+    double drillLength = pow(pow((firstPoint.x-secPoint.x)*tmp_im3D.pixelSpacingXY,2) + pow((firstPoint.y-secPoint.y)*tmp_im3D.pixelSpacingXY,2)+ pow((firstPoint.z- secPoint.z)*tmp_im3D.pixelSpacingZ ,2),.5);
+    return drillLength;
+}
+// GUI functions ------------------------------------------------------------
+void ImageLoader::resetPoints(){
+    countPoint = 1;
+    drawLine = false;
+    drawDrillTrajectory = false;
+}
+void ImageLoader::updateAllLabels(){
+    ui->label_p1->setText("Point 1: (" + QString::number(firstPoint.x) + "," + QString::number(firstPoint.y) + "," + QString::number(firstPoint.z) + ")");
+    ui->label_p2->setText("Point 2: (" + QString::number(secPoint.x) + "," + QString::number(secPoint.y) + "," + QString::number(secPoint.z) + ")");
+    ui->label_pos->setText("Slice Pos: (" + QString::number(round(reco.pos.x)) + "," + QString::number(round(reco.pos.y)) + "," + QString::number(round(reco.pos.z)) + ")");
+    ui->label_xdir->setText("xdir: (" + QString::number(round(reco.xdir.x*10)/10) + "," + QString::number(round(reco.xdir.y*10)/10) + "," + QString::number(round(reco.xdir.z*10)/10) + ")");
+    ui->label_ydir->setText("ydir: (" + QString::number(round(reco.ydir.x*10)/10) + "," + QString::number(round(reco.ydir.y*10)/10) + "," + QString::number(round(reco.ydir.z*10)/10) + ")");
+    ui->label_DrillLength->setText("Drill Length: " + QString::number(round(calculateDrillLength()*10)/10)  + " mm");
+}
+void ImageLoader::updateWindowingStartXY(int value){
+    ui->label_StartXY->setText("Start: " + QString::number(value));
+    updateView();
+}
+void ImageLoader::updateWindowingWidthXY(int value){
+    ui->label_WidthXY->setText("Width: " + QString::number(value));
+    updateView();
+}
+void ImageLoader::updateLayerNrXY(int value){
+    ui->label_LayerXY->setText("Layer: " + QString::number(value));
+    updateView();
+}
+void ImageLoader::updateTresholdXY_2(int value){
+    ui->label_ThresholdXY_2->setText("Threshold: " + QString::number(value));
+}
+void ImageLoader::updateWindowingStartXZ(int value){
+    ui->label_StartXZ->setText("Start: " + QString::number(value));
+    updateView();
+}
+void ImageLoader::updateWindowingWidthXZ(int value){
+    ui->label_WidthXZ->setText("Width: " + QString::number(value));
+    updateView();
+}
+void ImageLoader::updateLayerNrXZ(int value){
+    ui->label_LayerXZ->setText("Layer: " + QString::number(value));
+    updateView();
+}
+void ImageLoader::updateTresholdXZ_2(int value){
+    ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(value));
+}
+void ImageLoader::updateSliceDepth(int value){
+    ui->label_SliceDepth->setText("Move layer along the trajectory % " + QString::number(value));
+    if (drawDrillTrajectory == true){
+        reconstructSlice();
+    }
+}
+void ImageLoader::updateScale(int value){
+    scale = value;
+    ui->label_ScaleFac->setText("Scale Factror: " + QString::number(scale));
+    reconstructSlice();
+}
+void ImageLoader::updateAllSlidernLabels(){
+    // update text labels at the beginning
+    int startValue = ui->slider_StartValueXY->value();
+    int windowWidth = ui->slider_WindowWidthXY->value();
+    int layerNr = ui->slider_LayerNrXY->value();
+    int threshold_2 = ui->Slider_ThresholdXY_2->value();
+    int SliceDepth = ui->Slider_SliceDepth->value();
+
+    ui->label_StartXY->setText("Start: " + QString::number(startValue));
+    ui->label_WidthXY->setText("Width: " + QString::number(windowWidth));
+    ui->label_LayerXY->setText("Layer: " + QString::number(layerNr));
+    ui->label_ThresholdXY_2->setText("Threshold: " + QString::number(threshold_2));
+
+    int startValueXZ = ui->slider_StartValueXZ->value();
+    int windowWidthXZ = ui->slider_WindowWidthXZ->value();
+    int layerNrXZ = ui->slider_LayerNrXZ->value();
+    int thresholdXZ_2 = ui->Slider_ThresholdXZ_2->value();
+    ui->label_StartXZ->setText("Start: " + QString::number(startValueXZ));
+    ui->label_WidthXZ->setText("Width: " + QString::number(windowWidthXZ));
+    ui->label_LayerXZ->setText("Layer: " + QString::number(layerNrXZ));
+    ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(thresholdXZ_2));
+    ui->label_SliceDepth->setText("Move layer along the trajectory % " + QString::number(SliceDepth));
 }
 // fuctions for other features ----------------------------------------------
 void ImageLoader::update3DreflectionXY(){
@@ -468,87 +588,4 @@ void ImageLoader::updateDepthMapXZ(){
     }
     // Bild auf Benutzeroberfläche anzeigen
     ui->label_3DXZ->setPixmap(QPixmap::fromImage(image));
-}
-// GUI functions ------------------------------------------------------------
-
-void ImageLoader::updateAllLabels(){
-    ui->label_p1->setText("Point 1: (" + QString::number(firstPoint.x) + "," + QString::number(firstPoint.y) + "," + QString::number(firstPoint.z) + ")");
-    ui->label_p2->setText("Point 2: (" + QString::number(secPoint.x) + "," + QString::number(secPoint.y) + "," + QString::number(secPoint.z) + ")");
-    ui->label_pos->setText("Slice Pos: (" + QString::number(round(reco.pos.x)) + "," + QString::number(round(reco.pos.y)) + "," + QString::number(round(reco.pos.z)) + ")");
-    ui->label_xdir->setText("xdir: (" + QString::number(round(reco.xdir.x*10)/10) + "," + QString::number(round(reco.xdir.y*10)/10) + "," + QString::number(round(reco.xdir.z*10)/10) + ")");
-    ui->label_ydir->setText("ydir: (" + QString::number(round(reco.ydir.x*10)/10) + "," + QString::number(round(reco.ydir.y*10)/10) + "," + QString::number(round(reco.ydir.z*10)/10) + ")");
-
-
-}
-
-void ImageLoader::updateWindowingStartXY(int value){
-    ui->label_StartXY->setText("Start: " + QString::number(value));
-    updateView();
-}
-void ImageLoader::updateWindowingWidthXY(int value){
-    ui->label_WidthXY->setText("Width: " + QString::number(value));
-    updateView();
-}
-void ImageLoader::updateLayerNrXY(int value){
-    ui->label_LayerXY->setText("Layer: " + QString::number(value));
-    updateView();
-}
-void ImageLoader::updateTresholdXY(int value){
-    ui->label_ThresholdXY->setText("Threshold: " + QString::number(value));
-    updateView();
-}
-void ImageLoader::updateTresholdXY_2(int value){
-    ui->label_ThresholdXY_2->setText("Threshold: " + QString::number(value));
-}
-void ImageLoader::updateWindowingStartXZ(int value){
-    ui->label_StartXZ->setText("Start: " + QString::number(value));
-    updateView();
-}
-void ImageLoader::updateWindowingWidthXZ(int value){
-    ui->label_WidthXZ->setText("Width: " + QString::number(value));
-    updateView();
-}
-void ImageLoader::updateLayerNrXZ(int value){
-    ui->label_LayerXZ->setText("Layer: " + QString::number(value));
-    updateView();
-}
-void ImageLoader::updateTresholdXZ(int value){
-    ui->label_ThresholdXZ->setText("Threshold: " + QString::number(value));
-    updateView();
-}
-void ImageLoader::updateTresholdXZ_2(int value){
-    ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(value));
-}
-void ImageLoader::updateSliceDepth(int value){
-    ui->label_SliceDepth->setText("Move layer along the trajectory % " + QString::number(value));
-    if (drawDrillTrajectory == true){
-        reconstructSlice();
-    }
-}
-void ImageLoader::updateAllSlidernLabels(){
-    // update text labels at the beginning
-    int startValue = ui->slider_StartValueXY->value();
-    int windowWidth = ui->slider_WindowWidthXY->value();
-    int layerNr = ui->slider_LayerNrXY->value();
-    int treshold = ui->Slider_ThresholdXY->value();
-    int treshold_2 = ui->Slider_ThresholdXY_2->value();
-    int SliceDepth = ui->Slider_SliceDepth->value();
-
-    ui->label_StartXY->setText("Start: " + QString::number(startValue));
-    ui->label_WidthXY->setText("Width: " + QString::number(windowWidth));
-    ui->label_LayerXY->setText("Layer: " + QString::number(layerNr));
-    ui->label_ThresholdXY->setText("Threshold: " + QString::number(treshold));
-    ui->label_ThresholdXY_2->setText("Threshold: " + QString::number(treshold_2));
-
-    int startValueXZ = ui->slider_StartValueXZ->value();
-    int windowWidthXZ = ui->slider_WindowWidthXZ->value();
-    int layerNrXZ = ui->slider_LayerNrXZ->value();
-    int tresholdXZ = ui->Slider_ThresholdXZ->value();
-    int tresholdXZ_2 = ui->Slider_ThresholdXZ->value();
-    ui->label_StartXZ->setText("Start: " + QString::number(startValueXZ));
-    ui->label_WidthXZ->setText("Width: " + QString::number(windowWidthXZ));
-    ui->label_LayerXZ->setText("Layer: " + QString::number(layerNrXZ));
-    ui->label_ThresholdXZ->setText("Threshold: " + QString::number(tresholdXZ));
-    ui->label_ThresholdXZ_2->setText("Threshold: " + QString::number(tresholdXZ_2));
-    ui->label_SliceDepth->setText("Move layer along the trajectory % " + QString::number(SliceDepth));
 }

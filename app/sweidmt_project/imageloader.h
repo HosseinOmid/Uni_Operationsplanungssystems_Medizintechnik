@@ -43,7 +43,8 @@ private:
     int countPoint;
     bool drawLine;
     bool drawDrillTrajectory;
-
+    double drillDiameter;
+    double scale;
     image2D* reco_im2D;
 
     //short* m_pImageData;
@@ -56,16 +57,15 @@ private slots:
     void updateWindowingStartXY(int value);
     void updateWindowingWidthXY(int value);
     void updateLayerNrXY(int value);
-    void updateTresholdXY(int value);
     void updateTresholdXY_2(int value);
 
     void updateAllSlidernLabels();
     void updateWindowingStartXZ(int value);
     void updateWindowingWidthXZ(int value);
     void updateLayerNrXZ(int value);
-    void updateTresholdXZ(int value);
     void updateTresholdXZ_2(int value);
-
+    void resetPoints();
+    void updateScale(int value);
     void updateAllLabels();
 
     void updateSliceDepth(int value);
@@ -76,7 +76,7 @@ private slots:
     void updateDepthMapXY();
     void updateDepthMapXZ();
     void reconstructSlice();
-
+    double calculateDrillLength();
     void mousePressEvent(QMouseEvent *event);
 
 signals:
