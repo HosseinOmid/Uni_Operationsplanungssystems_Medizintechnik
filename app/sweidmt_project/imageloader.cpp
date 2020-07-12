@@ -7,7 +7,7 @@
 #include <qmessagebox.h>
 #include <cmath>
 #include <QMouseEvent>
-
+// Autor: Hossein Omid Beiki
 // constructor ------------------------------------------------------------------------------
 ImageLoader::ImageLoader(QWidget *parent)
     : QMainWindow(parent)
@@ -409,36 +409,51 @@ void ImageLoader::updateView(){
     }
     //------------------ Slice View --------------------------------------------
     QImage imageReco(reco_im2D->width,reco_im2D->height, QImage::Format_RGB32);
-    int startSlice = ui->slider_StartValueSlice->value();
-    int windowWidthSlice = ui->slider_WindowWidthSlice->value();
-    for (int i = 0; i < reco_im2D->width; i++){
-        for (int j = 0; j < reco_im2D->height; j++){
-            int iHuVal = reco_im2D->pImage[i + reco_im2D->width*j];
-            int iGrayVal;
-            int error_stat = MyLib::windowing(iHuVal, startSlice, windowWidthSlice, iGrayVal);
-            if (error_stat==-1) // 0 if ok. -1 if HU_value is out of range. -2 if windowing parameters are out of range)
-                emit LOG("Erro in Windowing! HU-value is out of range!");
-            else if (error_stat==-2)
-                emit LOG("Erro in Windowing! Windowing parameters are out of range!");
-            imageReco.setPixel(i,j, qRgb(iGrayVal, iGrayVal, iGrayVal));
+    if (drillTrajectoryIsDefined){
+        int startSlice = ui->slider_StartValueSlice->value();
+        int windowWidthSlice = ui->slider_WindowWidthSlice->value();
+        for (int i = 0; i < reco_im2D->width; i++){
+            for (int j = 0; j < reco_im2D->height; j++){
+                int iHuVal = reco_im2D->pImage[i + reco_im2D->width*j];
+                int iGrayVal;
+                int error_stat = MyLib::windowing(iHuVal, startSlice, windowWidthSlice, iGrayVal);
+                if (error_stat==-1) // 0 if ok. -1 if HU_value is out of range. -2 if windowing parameters are out of range)
+                    emit LOG("Erro in Windowing! HU-value is out of range!");
+                else if (error_stat==-2)
+                    emit LOG("Erro in Windowing! Windowing parameters are out of range!");
+                imageReco.setPixel(i,j, qRgb(iGrayVal, iGrayVal, iGrayVal));
+            }
         }
-    }
-    // Draw a red circle in size of drill diameter
-    double i0 = reco_im2D->width/2;
-    double j0 = reco_im2D->height/2;
-    for (float i = 0; i < reco_im2D->width; i = i+0.1) {
-        // circle equation: (i-i0)^2 + (j-j0)^2 = r^2
-        double scaledRadius = drillDiameter/2*scale;
-        double deltaj2 = pow(scaledRadius,2) - pow(i-i0,2);
-        if (deltaj2<0)
-            continue;
-        double dj1 = pow(deltaj2,.5) + j0;
-        int j1 = (int)dj1;
-        double dj2 = -pow(deltaj2,.5) + j0;
-        int j2 = (int)dj2;
-        if (j1> 0 && j2>0 && j1<reco_im2D->height && j2<reco_im2D->height){
-            imageReco.setPixel(i,j1, qRgb(255, 0, 0));
-            imageReco.setPixel(i,j2, qRgb(255, 0, 0));
+        // Draw a red circle in size of drill diameter
+        double i0 = reco_im2D->width/2;
+        double j0 = reco_im2D->height/2;
+        for (float i = 0; i < reco_im2D->width; i = i+0.1) {
+            // circle equation: (i-i0)^2 + (j-j0)^2 = r^2
+            double scaledRadius = drillDiameter/2*scale;
+            double deltaj2 = pow(scaledRadius,2) - pow(i-i0,2);
+            if (deltaj2<0)
+                continue;
+            double dj1 = pow(deltaj2,.5) + j0;
+            int j1 = (int)dj1;
+            double dj2 = -pow(deltaj2,.5) + j0;
+            int j2 = (int)dj2;
+            if (j1> 0 && j2>0 && j1<reco_im2D->height && j2<reco_im2D->height){
+                imageReco.setPixel(i,j1, qRgb(255, 0, 0));
+                imageReco.setPixel(i,j2, qRgb(255, 0, 0));
+            }
+        }
+        // draw a yellow square around the reconstructed slice
+        for (int i = 0; i < reco_im2D->width; i++) {
+            for (int j = 0; j < 3; j++){
+                imageReco.setPixel(i,j,qRgb(255, 255, 0));
+                imageReco.setPixel(i,reco_im2D->height-j-1,qRgb(255, 255, 0));
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < reco_im2D->height; j++){
+                imageReco.setPixel(i,j,qRgb(255, 255, 0));
+                imageReco.setPixel(reco_im2D->width-i-1,j,qRgb(255, 255, 0));
+            }
         }
     }
     // ------- update pics in the GUI -----------------------------------------
@@ -447,18 +462,20 @@ void ImageLoader::updateView(){
     // Bild auf Benutzeroberfläche anzeigen
     ui->label_imageXZ->setPixmap(QPixmap::fromImage(imageXZ));
     // Bild auf Benutzeroberfläche anzeigen
-    ui->label->setPixmap(QPixmap::fromImage(imageReco));
+    if (drillTrajectoryIsDefined)
+        ui->label->setPixmap(QPixmap::fromImage(imageReco));
 }
 
 void ImageLoader::loadData(){
     // set path of the data
-    // QString path = QFileDialog::getOpenFileName(this, "Open Image", "./","Raw Image Files (*.raw)");
-    QString path = "C:/Users/Hossein/Desktop/SoftwareentwicklungSS2020_Git_Repo/Femur256.raw";
+    QString path = QFileDialog::getOpenFileName(this, "Open Image", "./","Raw Image Files (*.raw)");
     // read the data and report the satus
     bool stat = m_pData->uploadImage(path);
     if (stat){ // if uploading image was successful
         updateView();
+        emit LOG(path);
         emit LOG("Data got successfully loaded.");
+
     }
     else{
         QMessageBox::critical(this, "ERROR", "Could not open/read the data");

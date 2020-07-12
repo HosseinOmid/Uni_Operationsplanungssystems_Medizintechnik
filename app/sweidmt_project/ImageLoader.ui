@@ -30,7 +30,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="iconSize">
      <size>
@@ -248,7 +248,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabXZLayer">
      <attribute name="title">
@@ -525,15 +525,25 @@
         <height>512</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="text">
-       <string>reconstructed Lyer</string>
+       <string>Step 1: Load your data by clicking on &quot;Load Data&quot; button.                Step 2: Select two points on XY view. You can use XZ view to adjust the depth of your points.                                                                                           Step 3: Define a drill diameter.                                                 Step 4: Click on the &quot;Slice&quot; button.                                                   Step 5: Use the below slider to move along the selected trajectory.                                                                                   ©Hossein Omid Beiki, RWTH Aachen, Softwareentwicklung in der Medizintechnik.</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLabel" name="label_StartSlice">
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>650</y>
+        <y>640</y>
         <width>111</width>
         <height>20</height>
        </rect>
@@ -546,7 +556,7 @@
       <property name="geometry">
        <rect>
         <x>39</x>
-        <y>650</y>
+        <y>640</y>
         <width>301</width>
         <height>30</height>
        </rect>
@@ -565,7 +575,7 @@
       <property name="geometry">
        <rect>
         <x>39</x>
-        <y>710</y>
+        <y>700</y>
         <width>301</width>
         <height>30</height>
        </rect>
@@ -587,7 +597,7 @@
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>710</y>
+        <y>700</y>
         <width>111</width>
         <height>20</height>
        </rect>
@@ -778,8 +788,8 @@
       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:9.6pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;10&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9.6pt;&quot;&gt;10&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_2">
